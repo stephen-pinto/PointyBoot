@@ -3,7 +3,7 @@ using System;
 
 namespace PointyBoot.Core
 {
-    public class PBServiceProvider : IDIServiceProvider
+    public class PBServiceProvider : IDIService, IDIContextBasedService
     {
         /// <summary>
         /// Context can be considered as a session which scopes the instances to a session.
@@ -25,74 +25,64 @@ namespace PointyBoot.Core
             return context.Get<T>();
         }
 
-        public IDIServiceProvider AddSingleton<T>()
+        public void AddSingleton<T>()
         {
-            globalContext.AddSingleton<T>();
-            return this;
+            globalContext.AddSingleton<T>();            
         }
 
-        public IDIServiceProvider AddSingleton<T>(IDIContext context)
+        public void AddSingleton<T>(IDIContext context)
         {
             context.AddSingleton<T>();
-            return this;
         }
 
-        public IDIServiceProvider AddSingleton<T>(object instance)
+        public void AddSingleton<T>(object instance)
         {
             globalContext.AddSingleton<T>(instance);
-            return this;
         }
 
-        public IDIServiceProvider AddSingleton<T>(IDIContext context, object instance)
+        public void AddSingleton<T>(IDIContext context, object instance)
         {
             context.AddSingleton<T>(instance);
-            return this;
         }
 
-        public IDIServiceProvider AddSingleton<T>(Func<T> instantiatorFunction)
+        public void AddSingleton<T>(Func<T> instantiatorFunction)
         {
             globalContext.AddSingleton(instantiatorFunction);
-            return this;
         }
 
-        public IDIServiceProvider AddSingleton<T>(IDIContext context, Func<T> instantiatorFunction)
+        public void AddSingleton<T>(IDIContext context, Func<T> instantiatorFunction)
         {
             context.AddSingleton(instantiatorFunction);
-            return this;
         }
 
-        public IDIServiceProvider RegisterFactory<T>(Func<T> factory)
+        public void RegisterFactory<T>(Func<T> instantiatorFunction)
             where T : class
         {
-            globalContext.RegisterFactory(factory);
-            return this;
+            globalContext.RegisterFactory(instantiatorFunction);
         }
 
-        public IDIServiceProvider RegisterFactory<T>(IDIContext context, Func<T> factory)
+        public void RegisterFactory<T>(IDIContext context, Func<T> factory)
             where T : class
         {
             context.RegisterFactory(factory);
-            return this;
         }
 
-        public IDIServiceProvider RegisterComponentFactory<T>(T instance = null)
+        public void RegisterComponentFactory<T>(T instance = null)
             where T : class
         {
             if (instance == null)
                 instance = globalContext.Get<T>();
 
             globalContext.RegisterComponentFactory(instance);
-            return this;
         }
 
-        public IDIServiceProvider RegisterComponentFactory<T>(IDIContext context, T instance = null)
+        public void RegisterComponentFactory<T>(IDIContext context, T instance = null)
              where T : class
         {
             if (instance == null)
                 instance = globalContext.Get<T>();
 
             context.RegisterComponentFactory(instance);
-            return this;
         }
     }
 }

@@ -16,7 +16,7 @@ namespace PointyBoot.Core
             return context.Value;
         }
 
-        public static IDIServiceProvider GetServiceProvider()
+        public static IDIService GetServiceProvider()
         {
             var obj = new PBServiceProvider(context.Value);
             return obj;

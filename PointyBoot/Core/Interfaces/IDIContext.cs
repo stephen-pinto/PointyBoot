@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace PointyBoot.Core.Interfaces
 {
-    public interface IDIContext : IDIServices
+    public interface IDIContext : IDIService, IDisposable
     {
         Dictionary<Type, object> SingletonStore { get; }
 

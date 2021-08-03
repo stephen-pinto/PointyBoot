@@ -10,7 +10,7 @@ namespace PointyBoot.Core.Context
         private readonly PBContextHelper contextHelper;
         private PBContextInfo contextInfo;
 
-        Dictionary<Type, object> IDIContext.SingletonStore
+        public Dictionary<Type, object> SingletonStore
         {
             get
             {
@@ -18,7 +18,7 @@ namespace PointyBoot.Core.Context
             }
         }
 
-        Dictionary<Type, Func<object>> IDIContext.FactoryFunctionStore
+        public Dictionary<Type, Func<object>> FactoryFunctionStore
         {
             get
             {
@@ -33,10 +33,10 @@ namespace PointyBoot.Core.Context
             contextHelper = new PBContextHelper();
         }
 
-        public static PBContext NewContext(PBContextInfo contextInfo)
-        {
-            return new PBContext(contextInfo);
-        }
+        //public static PBContext NewContext(PBContextInfo contextInfo)
+        //{
+        //    return new PBContext(contextInfo);
+        //}
 
         public T Get<T>()
         {
@@ -44,13 +44,15 @@ namespace PointyBoot.Core.Context
         }
 
         public void RegisterComponentFactory<T>(T obj)
+            where T : class
         {
             contextHelper.LoadComponentFactory(ref contextInfo, obj);
         }
 
         public void RegisterFactory<T>(Func<T> factory)
+            where T : class
         {
-            contextInfo.FactoryFunctionStore.Add(typeof(T), () => factory());
+            contextInfo.FactoryFunctionStore.Add(typeof(T), factory);
         }
 
         public void AddSingleton<T>()
@@ -68,37 +70,13 @@ namespace PointyBoot.Core.Context
             if (instantiatorFunction is null)
                 throw new ArgumentNullException(nameof(instantiatorFunction));
 
-            contextInfo.SingletonStore.Add(typeof(T), instantiatorFunction());
+            contextInfo.SingletonStore.Add(typeof(T), instantiatorFunction);
         }
 
-        T IDIServices.Get<T>()
+        public void Dispose()
         {
-            throw new NotImplementedException();
-        }
-
-        void IDIServices.RegisterComponentFactory<T>(T instance)
-        {
-            throw new NotImplementedException();
-        }
-
-        void IDIServices.AddSingleton<T>()
-        {
-            throw new NotImplementedException();
-        }
-
-        void IDIServices.AddSingleton<T>(object instance)
-        {
-            throw new NotImplementedException();
-        }
-
-        void IDIServices.AddSingleton<T>(Func<T> instantiatorFunction)
-        {
-            throw new NotImplementedException();
-        }
-
-        void IDIServices.RegisterFactory<T>(Func<T> factory)
-        {
-            throw new NotImplementedException();
+            contextInfo.FactoryFunctionStore.Clear();
+            contextInfo.SingletonStore.Clear();
         }
     }
 }

@@ -19,6 +19,7 @@ namespace PointyBoot.Core.Context
             
             //Get all the functions with this attribute
             var functions = targetType.GetMethods().Where(meth => meth.IsDefined(typeof(PointyComponentProviderFunc), false));
+            
             if(functions.Any())
             {
                 for (int i = 0; i < functions.Count(); i++)
