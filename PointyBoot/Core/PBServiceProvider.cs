@@ -16,6 +16,16 @@ namespace PointyBoot.Core
             globalContext = new PBContext();            
         }
 
+        public T Get<T>()
+        {
+            return globalContext.Get<T>();
+        }
+
+        public T Get<T>(IContext context)
+        {
+            return ((IServices)context).Get<T>();
+        }
+
         public IServiceProvider AddSingleton<T>()
         {
             globalContext.AddSingleton<T>();
@@ -52,14 +62,18 @@ namespace PointyBoot.Core
             return this;
         }
 
-        public T Get<T>()
+        public IServiceProvider RegisterFactory<T>(Func<T> factory)
+            where T : class
         {
-            return globalContext.Get<T>();
+            globalContext.RegisterFactory(factory);
+            return this;
         }
 
-        public T Get<T>(IContext context)
+        public IServiceProvider RegisterFactory<T>(IContext context, Func<T> factory)
+            where T : class
         {
-            return ((IServices)context).Get<T>();
+            ((IServices)context).RegisterFactory(factory);
+            return this;
         }
 
         public IServiceProvider RegisterComponentFactory<T>(T instance = null)
@@ -79,13 +93,6 @@ namespace PointyBoot.Core
                 instance = globalContext.Get<T>();
 
             ((IServices)context).RegisterComponentFactory(instance);
-            return this;
-        }
-
-        public IServiceProvider RegisterFactory<T>(Func<T> factory)
-            where T : class
-        {
-            globalContext.RegisterFactory(factory);
             return this;
         }
     }

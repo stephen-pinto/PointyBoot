@@ -15,5 +15,7 @@ namespace PointyBoot.Core
         void AddSingleton<T>(object instance);
 
         void AddSingleton<T>(Func<T> instantiatorFunction);
+
+        void RegisterFactory<T>(Func<T> factory);
     }
 }

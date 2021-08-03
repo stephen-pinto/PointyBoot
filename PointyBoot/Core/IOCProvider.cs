@@ -19,6 +19,12 @@ namespace PointyBoot.Core
             interContextSharedInfo = InterContextSharedInfo.Instance;
         }
 
+        /// <summary>
+        /// Creates new instance by Type. If for the given context (or default context) the initializer is specified then use that.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="contextInfo"></param>
+        /// <returns></returns>
         public object New(Type type, PBContextInfo contextInfo = null)
         {
             contextInfo ??= ContextInfo;
@@ -43,13 +49,15 @@ namespace PointyBoot.Core
             //Set properties
             Wire(ref instance, type);
 
-            //TODO: Check if the below code is required anymore
-            //Add to the store if required again
-            //ContextInfo.SingletonStore.Add(type, instance);
-
             return instance;
         }
 
+        /// <summary>
+        /// We wire the instances with properties or functions here.
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="type"></param>
+        /// <param name="contextInfo"></param>
         public void Wire(ref object instance, Type type, PBContextInfo contextInfo = null)
         {
             contextInfo = contextInfo ?? ContextInfo;
@@ -138,6 +146,13 @@ namespace PointyBoot.Core
             return ObjActivatorForType(paramInstances);
         }
 
+        /// <summary>
+        /// Set parameters when wiring.
+        /// </summary>
+        /// <param name="contextInfo"></param>
+        /// <param name="parameters"></param>
+        /// <param name="primVals"></param>
+        /// <returns></returns>
         private object[] SetParameters(PBContextInfo contextInfo, ParameterInfo[] parameters, object[] primVals)
         {
             //Else get instance of dependent instances
@@ -166,6 +181,12 @@ namespace PointyBoot.Core
             return paramInstances;
         }
 
+        /// <summary>
+        /// New instantiator of generic type.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="currentContext"></param>
+        /// <returns></returns>
         public T New<T>(PBContextInfo currentContext = null)
         {
             return (T)New(typeof(T), currentContext);
@@ -173,6 +194,11 @@ namespace PointyBoot.Core
 
         #region Private functions
         
+        /// <summary>
+        /// Get initialzable constructor.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         private ConstructorInfo GetInitializableConstructor(Type type)
         {
             var constructors = type.GetConstructors();

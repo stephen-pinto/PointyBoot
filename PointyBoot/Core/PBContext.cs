@@ -29,7 +29,7 @@ namespace PointyBoot.Core
 
         public void RegisterComponentFactory<T>(T obj)
         {
-            contextHelper.LoadPComponentFactory(ref contextInfo, obj);
+            contextHelper.LoadComponentFactory(ref contextInfo, obj);
         }
 
         public void RegisterFactory<T>(Func<T> factory)
