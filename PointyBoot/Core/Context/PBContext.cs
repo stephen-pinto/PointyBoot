@@ -1,19 +1,17 @@
 ﻿using PointyBoot.Core.Interfaces;
 using System;
 
-namespace PointyBoot.Core
+namespace PointyBoot.Core.Context
 {
-    public class PBContext : IServices, IContext
+    public class PBContext : IDIContext
     {
         private readonly IOCProvider instanceProvider;
         private readonly PBContextHelper contextHelper;
         private PBContextInfo contextInfo;
 
-        public PBContext(PBContextInfo contextInfo = null)
+        internal PBContext(PBContextInfo contextInfo)
         {
-            if(contextInfo == null)
-                this.contextInfo = new PBContextInfo();
-
+            this.contextInfo = contextInfo;
             instanceProvider = new IOCProvider(this.contextInfo);
             contextHelper = new PBContextHelper();
         }

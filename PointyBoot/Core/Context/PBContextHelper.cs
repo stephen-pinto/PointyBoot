@@ -2,7 +2,7 @@
 using System;
 using System.Linq;
 
-namespace PointyBoot.Core
+namespace PointyBoot.Core.Context
 {
     public class PBContextHelper
     {

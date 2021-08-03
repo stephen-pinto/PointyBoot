@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace PointyBoot.Core.Interfaces
 {
-    public interface IServices
+    public interface IDIServices
     {
         T Get<T>();
 

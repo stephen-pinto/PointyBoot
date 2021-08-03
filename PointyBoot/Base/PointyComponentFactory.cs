@@ -1,4 +1,4 @@
-﻿namespace PointyBoot.BaseStructure
+﻿namespace PointyBoot.Base
 {
     public abstract class PointyComponentFactory : IPointyComponentFactory
     {

@@ -1,4 +1,4 @@
-﻿namespace PointyBoot.BaseStructure
+﻿namespace PointyBoot.Base
 {
     interface IPointyComponentFactory
     {

@@ -1,4 +1,6 @@
 ﻿using PointyBoot.Attributes;
+using PointyBoot.Core.Context;
+using PointyBoot.Core.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,16 +9,19 @@ using System.Reflection;
 
 namespace PointyBoot.Core
 {
+    /// <summary>
+    /// This is the main class which provides mapping and instantiation based on attributes
+    /// </summary>
     public class IOCProvider
     {
-        private readonly InterContextSharedInfo interContextSharedInfo;
+        private readonly IActivatorStore interContextSharedInfo;
 
         public PBContextInfo ContextInfo { get; private set; }
 
         public IOCProvider(PBContextInfo contextInfo)
         {
             ContextInfo = contextInfo;
-            interContextSharedInfo = InterContextSharedInfo.Instance;
+            interContextSharedInfo = PBServicesFactory.GetActivatorStore();
         }
 
         /// <summary>

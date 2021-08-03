@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace PointyBoot.BaseStructure
+namespace PointyBoot.Base
 {
     public class PBBindingProvider
     {

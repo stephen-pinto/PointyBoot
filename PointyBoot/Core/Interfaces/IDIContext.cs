@@ -1,6 +1,6 @@
 ﻿namespace PointyBoot.Core.Interfaces
 {
-    public interface IContext
+    public interface IDIContext : IDIServices
     {
 
     }
