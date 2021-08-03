@@ -1,4 +1,4 @@
-﻿namespace PointyBoot.Core
+﻿namespace PointyBoot.Core.Interfaces
 {
     public interface IContext
     {

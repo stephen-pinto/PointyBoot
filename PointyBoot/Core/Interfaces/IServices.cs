@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace PointyBoot.Core
+namespace PointyBoot.Core.Interfaces
 {
     public interface IServices
     {

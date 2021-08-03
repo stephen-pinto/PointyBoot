@@ -1,10 +1,11 @@
-﻿using System;
+﻿using PointyBoot.Core.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace PointyBoot.Core
 {
-    public class PBServiceProvider : IServiceProvider
+    public class PBServiceProvider : IDIServiceProvider
     {
         /// <summary>
         /// Context can be considered as a session which scopes the instances to a session.
@@ -26,57 +27,57 @@ namespace PointyBoot.Core
             return ((IServices)context).Get<T>();
         }
 
-        public IServiceProvider AddSingleton<T>()
+        public IDIServiceProvider AddSingleton<T>()
         {
             globalContext.AddSingleton<T>();
             return this;
         }
 
-        public IServiceProvider AddSingleton<T>(IContext context)
+        public IDIServiceProvider AddSingleton<T>(IContext context)
         {
             ((IServices)context).AddSingleton<T>();
             return this;
         }
 
-        public IServiceProvider AddSingleton<T>(object instance)
+        public IDIServiceProvider AddSingleton<T>(object instance)
         {
             globalContext.AddSingleton<T>(instance);
             return this;
         }
 
-        public IServiceProvider AddSingleton<T>(IContext context, object instance)
+        public IDIServiceProvider AddSingleton<T>(IContext context, object instance)
         {
             ((IServices)context).AddSingleton<T>(instance);
             return this;
         }
 
-        public IServiceProvider AddSingleton<T>(Func<T> instantiatorFunction)
+        public IDIServiceProvider AddSingleton<T>(Func<T> instantiatorFunction)
         {
             globalContext.AddSingleton(instantiatorFunction);
             return this;
         }
 
-        public IServiceProvider AddSingleton<T>(IContext context, Func<T> instantiatorFunction)
+        public IDIServiceProvider AddSingleton<T>(IContext context, Func<T> instantiatorFunction)
         {
             ((IServices)context).AddSingleton(instantiatorFunction);
             return this;
         }
 
-        public IServiceProvider RegisterFactory<T>(Func<T> factory)
+        public IDIServiceProvider RegisterFactory<T>(Func<T> factory)
             where T : class
         {
             globalContext.RegisterFactory(factory);
             return this;
         }
 
-        public IServiceProvider RegisterFactory<T>(IContext context, Func<T> factory)
+        public IDIServiceProvider RegisterFactory<T>(IContext context, Func<T> factory)
             where T : class
         {
             ((IServices)context).RegisterFactory(factory);
             return this;
         }
 
-        public IServiceProvider RegisterComponentFactory<T>(T instance = null)
+        public IDIServiceProvider RegisterComponentFactory<T>(T instance = null)
             where T : class
         {
             if(instance == null)
@@ -86,7 +87,7 @@ namespace PointyBoot.Core
             return this;
         }
 
-        public IServiceProvider RegisterComponentFactory<T>(IContext context, T instance = null)
+        public IDIServiceProvider RegisterComponentFactory<T>(IContext context, T instance = null)
              where T : class
         {
             if (instance == null)
