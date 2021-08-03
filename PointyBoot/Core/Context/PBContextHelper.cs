@@ -1,4 +1,5 @@
 ﻿using PointyBoot.Attributes.Provider;
+using PointyBoot.Core.Interfaces;
 using System;
 using System.Linq;
 
@@ -6,7 +7,7 @@ namespace PointyBoot.Core.Context
 {
     public class PBContextHelper
     {
-        public void LoadComponentFactory<T>(ref PBContextInfo context, T instance)
+        public void LoadComponentFactory<T>(IDIContext context, T instance)
         {
             var targetType = typeof(T);
             

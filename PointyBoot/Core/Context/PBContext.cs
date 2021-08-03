@@ -30,13 +30,8 @@ namespace PointyBoot.Core.Context
         {
             this.contextInfo = contextInfo;
             instanceProvider = PBServicesFactory.GetIOCProvider();
-            contextHelper = new PBContextHelper();
+            contextHelper = PBContextFactory.GetContextHelper();
         }
-
-        //public static PBContext NewContext(PBContextInfo contextInfo)
-        //{
-        //    return new PBContext(contextInfo);
-        //}
 
         public T Get<T>()
         {
@@ -46,7 +41,7 @@ namespace PointyBoot.Core.Context
         public void RegisterComponentFactory<T>(T obj)
             where T : class
         {
-            contextHelper.LoadComponentFactory(ref contextInfo, obj);
+            contextHelper.LoadComponentFactory(this, obj);
         }
 
         public void RegisterFactory<T>(Func<T> factory)
