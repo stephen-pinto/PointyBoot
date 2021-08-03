@@ -3,6 +3,7 @@ using System;
 
 namespace PointyBoot.Core
 {
+    [Obsolete("Dont need this class anymore")]
     public class PBServiceProvider : IDIService, IDIContextBasedService
     {
         /// <summary>

@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PointyBoot", "PointyBoot\Po
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApp", "TestApp\TestApp.csproj", "{B54DA282-47F9-4BED-B06B-A00C0E6985D3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PointyBoot.Test", "PointyBoot.Test\PointyBoot.Test.csproj", "{9CE50629-8549-48F1-B01A-685739CB8A0A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{B54DA282-47F9-4BED-B06B-A00C0E6985D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B54DA282-47F9-4BED-B06B-A00C0E6985D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B54DA282-47F9-4BED-B06B-A00C0E6985D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9CE50629-8549-48F1-B01A-685739CB8A0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CE50629-8549-48F1-B01A-685739CB8A0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CE50629-8549-48F1-B01A-685739CB8A0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CE50629-8549-48F1-B01A-685739CB8A0A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
