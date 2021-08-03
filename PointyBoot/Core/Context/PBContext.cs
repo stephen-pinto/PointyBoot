@@ -1,5 +1,6 @@
 ﻿using PointyBoot.Core.Interfaces;
 using System;
+using System.Collections.Generic;
 
 namespace PointyBoot.Core.Context
 {
@@ -9,10 +10,26 @@ namespace PointyBoot.Core.Context
         private readonly PBContextHelper contextHelper;
         private PBContextInfo contextInfo;
 
+        Dictionary<Type, object> IDIContext.SingletonStore
+        {
+            get
+            {
+                return contextInfo.SingletonStore;
+            }
+        }
+
+        Dictionary<Type, Func<object>> IDIContext.FactoryFunctionStore
+        {
+            get
+            {
+                return contextInfo.FactoryFunctionStore;
+            }
+        }
+
         internal PBContext(PBContextInfo contextInfo)
         {
             this.contextInfo = contextInfo;
-            instanceProvider = new IOCProvider(this.contextInfo);
+            instanceProvider = PBServicesFactory.GetIOCProvider();
             contextHelper = new PBContextHelper();
         }
 
@@ -50,8 +67,38 @@ namespace PointyBoot.Core.Context
         {
             if (instantiatorFunction is null)
                 throw new ArgumentNullException(nameof(instantiatorFunction));
-            
+
             contextInfo.SingletonStore.Add(typeof(T), instantiatorFunction());
+        }
+
+        T IDIServices.Get<T>()
+        {
+            throw new NotImplementedException();
+        }
+
+        void IDIServices.RegisterComponentFactory<T>(T instance)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IDIServices.AddSingleton<T>()
+        {
+            throw new NotImplementedException();
+        }
+
+        void IDIServices.AddSingleton<T>(object instance)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IDIServices.AddSingleton<T>(Func<T> instantiatorFunction)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IDIServices.RegisterFactory<T>(Func<T> factory)
+        {
+            throw new NotImplementedException();
         }
     }
 }

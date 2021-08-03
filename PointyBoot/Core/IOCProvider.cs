@@ -16,9 +16,9 @@ namespace PointyBoot.Core
     {
         private readonly IActivatorStore interContextSharedInfo;
 
-        public PBContextInfo ContextInfo { get; private set; }
+        public IDIContext ContextInfo { get; private set; }
 
-        public IOCProvider(PBContextInfo contextInfo)
+        public IOCProvider(IDIContext contextInfo)
         {
             ContextInfo = contextInfo;
             interContextSharedInfo = PBServicesFactory.GetActivatorStore();
@@ -30,7 +30,7 @@ namespace PointyBoot.Core
         /// <param name="type"></param>
         /// <param name="contextInfo"></param>
         /// <returns></returns>
-        public object New(Type type, PBContextInfo contextInfo = null)
+        public object New(Type type, IDIContext contextInfo = null)
         {
             contextInfo ??= ContextInfo;
 
@@ -63,7 +63,7 @@ namespace PointyBoot.Core
         /// <param name="instance"></param>
         /// <param name="type"></param>
         /// <param name="contextInfo"></param>
-        public void Wire(ref object instance, Type type, PBContextInfo contextInfo = null)
+        public void Wire(ref object instance, Type type, IDIContext contextInfo = null)
         {
             contextInfo = contextInfo ?? ContextInfo;
             var properties = type.GetProperties().Where(prop => prop.IsDefined(typeof(Autowired), false));
@@ -84,7 +84,7 @@ namespace PointyBoot.Core
         /// <param name="type">Type of object to instantiate</param>
         /// <param name="contextInfo">Context data to refer</param>
         /// <returns></returns>
-        public object Instantiate(Type type, PBContextInfo contextInfo = null)
+        public object Instantiate(Type type, IDIContext contextInfo = null)
         {
             contextInfo ??= ContextInfo;
             var constructor = GetInitializableConstructor(type);
@@ -114,7 +114,7 @@ namespace PointyBoot.Core
         /// <param name="type">Type of object to instantiate</param>
         /// <param name="contextInfo">Context data to refer</param>
         /// <returns></returns>
-        public object Instantiate2(Type type, PBContextInfo contextInfo = null)
+        public object Instantiate2(Type type, IDIContext contextInfo = null)
         {
             contextInfo ??= ContextInfo;
             var constructor = GetInitializableConstructor(type);
@@ -158,7 +158,7 @@ namespace PointyBoot.Core
         /// <param name="parameters"></param>
         /// <param name="primVals"></param>
         /// <returns></returns>
-        private object[] SetParameters(PBContextInfo contextInfo, ParameterInfo[] parameters, object[] primVals)
+        private object[] SetParameters(IDIContext contextInfo, ParameterInfo[] parameters, object[] primVals)
         {
             //Else get instance of dependent instances
             object[] paramInstances = new object[parameters.Length];
@@ -192,7 +192,7 @@ namespace PointyBoot.Core
         /// <typeparam name="T"></typeparam>
         /// <param name="currentContext"></param>
         /// <returns></returns>
-        public T New<T>(PBContextInfo currentContext = null)
+        public T New<T>(IDIContext currentContext = null)
         {
             return (T)New(typeof(T), currentContext);
         }
