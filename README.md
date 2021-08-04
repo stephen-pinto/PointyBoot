@@ -6,7 +6,7 @@ This project is inspired from the DI model of SpringBoot project. It does not in
 
 - Properties
 - Classes or Constructors
-- Functions
+- Functions [coming soon]
 
 This library is production ready although I have tried to fix most of the bugs and improve much of its performance. But there is still room for more.
 
