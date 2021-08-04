@@ -85,5 +85,10 @@ namespace PointyBoot.Core
 
             context.RegisterComponentFactory(instance);
         }
+
+        public void AddMapping<IntfType, ActType>() where ActType : IntfType
+        {
+            throw new NotImplementedException();
+        }
     }
 }

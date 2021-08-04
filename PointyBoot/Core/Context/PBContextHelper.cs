@@ -7,7 +7,7 @@ namespace PointyBoot.Core.Context
 {
     public class PBContextHelper
     {
-        public void LoadComponentFactory<T>(IDIContext context, T instance)
+        public void LoadComponentFactory<T>(PBContextInfo context, T instance)
         {
             var targetType = typeof(T);
             

@@ -8,7 +8,7 @@ namespace PointyBoot.Core
 {
     public static class PBServicesFactory
     {
-        private static Lazy<PBActivatorStore> activatorStore = new Lazy<PBActivatorStore>();
+        private static Lazy<PBActivatorCache> activatorStore = new Lazy<PBActivatorCache>();
         private static Lazy<IDIContext> context = new Lazy<IDIContext>(() => PBContextFactory.GetNewContext());
 
         internal static IDIContext GetGlobalContext()
@@ -22,7 +22,7 @@ namespace PointyBoot.Core
             return obj;
         }
 
-        public static IActivatorStore GetActivatorStore()
+        public static IActivatorStore GetGlobalActivatorCache()
         {
             return activatorStore.Value;
         }

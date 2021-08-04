@@ -5,26 +5,16 @@ using System.Collections.Generic;
 namespace PointyBoot.Core.Context
 {
     public class PBContext : IDIContext
-    {
+    {   
         private readonly IOCProvider instanceProvider;
         private readonly PBContextHelper contextHelper;
         private PBContextInfo contextInfo;
 
-        public Dictionary<Type, object> SingletonStore
-        {
-            get
-            {
-                return contextInfo.SingletonStore;
-            }
-        }
+        public IReadOnlyDictionary<Type, object> SingletonStore => contextInfo.SingletonStore;
 
-        public Dictionary<Type, Func<object>> FactoryFunctionStore
-        {
-            get
-            {
-                return contextInfo.FactoryFunctionStore;
-            }
-        }
+        public IReadOnlyDictionary<Type, Func<object>> FactoryFunctionStore => contextInfo.FactoryFunctionStore;
+
+        public IReadOnlyDictionary<Type, Type> TypeMapping => contextInfo.TypeMapping;
 
         internal PBContext(PBContextInfo contextInfo)
         {
@@ -41,13 +31,21 @@ namespace PointyBoot.Core.Context
         public void RegisterComponentFactory<T>(T obj)
             where T : class
         {
-            contextHelper.LoadComponentFactory(this, obj);
+            contextHelper.LoadComponentFactory(contextInfo, obj);
         }
 
         public void RegisterFactory<T>(Func<T> factory)
             where T : class
         {
             contextInfo.FactoryFunctionStore.Add(typeof(T), factory);
+        }
+
+        public void AddMapping<IntfType, ActType>() where ActType : IntfType
+        {
+            if (!contextInfo.TypeMapping.ContainsKey(typeof(IntfType)))
+                contextInfo.TypeMapping.Add(typeof(IntfType), typeof(ActType));
+            else
+                throw new ArgumentException($"Mapping for type {typeof(IntfType).Name} is already defined");
         }
 
         public void AddSingleton<T>()

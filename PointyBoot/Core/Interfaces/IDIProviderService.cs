@@ -6,6 +6,8 @@ namespace PointyBoot.Core.Interfaces
     {
         T Get<T>();
 
+        IDIProviderService AddMap<IntfType, ActType>() where ActType : IntfType;
+
         IDIProviderService AddSingleton<T>();
 
         IDIProviderService AddSingleton<T>(object instanceObj);

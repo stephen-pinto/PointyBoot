@@ -16,6 +16,12 @@ namespace PointyBoot.Base
                 currentContext = PBServicesFactory.GetGlobalContext();
         }
 
+        public IDIProviderService AddMap<IntfType, ActType>() where ActType : IntfType
+        {
+            currentContext.AddMapping<IntfType, ActType>();
+            return this;
+        }
+
         public IDIProviderService AddSingleton<T>()
         {
             currentContext.AddSingleton<T>();

@@ -21,7 +21,7 @@ namespace PointyBoot.Core
         public IOCProvider(IDIContext contextInfo)
         {
             ContextInfo = contextInfo;
-            interContextSharedInfo = PBServicesFactory.GetActivatorStore();
+            interContextSharedInfo = PBServicesFactory.GetGlobalActivatorCache();
         }
 
         /// <summary>
@@ -33,23 +33,45 @@ namespace PointyBoot.Core
         public object New(Type type, IDIContext contextInfo = null)
         {
             contextInfo ??= ContextInfo;
+            var solidType = contextInfo.TypeMapping.ContainsKey(type) ? contextInfo.TypeMapping[type] : null;
 
-            //Check if we already have a singleton stored of this type
+            //Check if we already have a singleton stored of this type (or solid type)
             if (contextInfo.SingletonStore.ContainsKey(type))
                 return contextInfo.SingletonStore[type];
+            else if (solidType != null && contextInfo.SingletonStore.ContainsKey(type))
+                return contextInfo.SingletonStore[solidType];
 
-            //Check if we already have a factory function for this type
+            //Check if we already have a factory function for this type (or solid type)
             if (contextInfo.FactoryFunctionStore.ContainsKey(type))
                 return contextInfo.FactoryFunctionStore[type];
+            else if (solidType != null && contextInfo.FactoryFunctionStore.ContainsKey(solidType))
+                return contextInfo.FactoryFunctionStore[solidType];
 
             //Instantiate
             object instance = null;
 
-            //If there is factory defined for this class then use that else use regular
-            if (!contextInfo.FactoryFunctionStore.ContainsKey(type))
-                instance = Instantiate2(type);
-            else
+            //If there is factory defined for this interface/class then use that else use regular
+            if (contextInfo.FactoryFunctionStore.ContainsKey(type))
+            {
                 instance = contextInfo.FactoryFunctionStore[type].Invoke();
+            }
+            else if (solidType != null && contextInfo.FactoryFunctionStore.ContainsKey(solidType))
+            {
+                instance = contextInfo.FactoryFunctionStore[solidType].Invoke();
+            }
+            else
+            {
+                //If solid type available then we wont be able to instantiate with 'type' anyway
+                //Use 'solidType' then instead otherwise use the 'type'
+                if (solidType != null)
+                    instance = Instantiate2(solidType);
+                else
+                    instance = Instantiate2(type);
+            }
+
+            //If we were unable to find an instantiator then
+            if (instance == null)
+                throw new TypeAccessException($"Cannot instantiate type {type} as no factory or solid type defined.");
 
             //Set properties
             Wire(ref instance, type);
@@ -73,7 +95,7 @@ namespace PointyBoot.Core
 
             foreach (var prop in properties)
             {
-                var attributes = prop.GetCustomAttributes(typeof(Autowired), true).FirstOrDefault() as Autowired;
+                //var attributes = prop.GetCustomAttributes(typeof(Autowired), true).FirstOrDefault() as Autowired;
                 prop.SetValue(instance, New(prop.PropertyType, contextInfo));
             }
         }
@@ -170,6 +192,7 @@ namespace PointyBoot.Core
             for (int i = 0; i < parameters.Length; i++)
             {
                 var parmType = parameters[i].ParameterType;
+
                 if (parmType.IsPrimitive)
                 {
                     if (primVals != null && primVals.Length >= primValIndex)
@@ -198,7 +221,7 @@ namespace PointyBoot.Core
         }
 
         #region Private functions
-        
+
         /// <summary>
         /// Get initialzable constructor.
         /// </summary>
@@ -211,7 +234,7 @@ namespace PointyBoot.Core
 
             //Find constructor with Autowired attribute if not find default constructor
             defaultConstructor = constructors.Where(c => c.IsDefined(typeof(Autowired)) || c.GetParameters().Length == 0).FirstOrDefault();
-          
+
             return defaultConstructor;
         }
 

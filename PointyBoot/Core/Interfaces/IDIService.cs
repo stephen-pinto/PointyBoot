@@ -6,6 +6,8 @@ namespace PointyBoot.Core.Interfaces
     {
         T Get<T>();
 
+        void AddMapping<IntfType, ActType>() where ActType : IntfType;
+
         void AddSingleton<T>();
 
         void AddSingleton<T>(object instanceObj);
