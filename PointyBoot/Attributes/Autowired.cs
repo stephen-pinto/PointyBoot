@@ -6,9 +6,7 @@ namespace PointyBoot.Attributes
     public sealed class Autowired : Attribute
     {
         public Autowired()
-        {
-
-        }
+        {}
 
         public Autowired(params object[] primitiveParamValues)
         {

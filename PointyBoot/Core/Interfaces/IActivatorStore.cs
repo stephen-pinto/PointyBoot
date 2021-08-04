@@ -5,6 +5,6 @@ namespace PointyBoot.Core.Interfaces
 {
     public interface IActivatorStore
     {
-        Dictionary<Type, ObjectActivator> ObjectActivators { get; set; }
+        Dictionary<Type, ObjectActivator> ObjectActivators { get; }
     }
 }

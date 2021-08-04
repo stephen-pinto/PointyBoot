@@ -6,9 +6,7 @@ namespace PointyBoot.Attributes.Provider
     public sealed class PointyComponentProviderFunc : Attribute
     {
         public PointyComponentProviderFunc()
-        {
-
-        }
+        {}
 
         public PointyComponentProviderFunc(params object[] parameters)
         {
