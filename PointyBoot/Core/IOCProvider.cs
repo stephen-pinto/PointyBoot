@@ -25,6 +25,17 @@ namespace PointyBoot.Core
         }
 
         /// <summary>
+        /// New instantiator of generic type.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="currentContext"></param>
+        /// <returns></returns>
+        public T New<T>(IDIContext currentContext = null)
+        {
+            return (T)New(typeof(T), currentContext);
+        }
+
+        /// <summary>
         /// Creates new instance by Type. If for the given context (or default context) the initializer is specified then use that.
         /// </summary>
         /// <param name="type"></param>
@@ -64,9 +75,9 @@ namespace PointyBoot.Core
                 //If solid type available then we wont be able to instantiate with 'type' anyway
                 //Use 'solidType' then instead otherwise use the 'type'
                 if (solidType != null)
-                    instance = Instantiate2(solidType);
+                    instance = Instantiate(solidType);
                 else
-                    instance = Instantiate2(type);
+                    instance = Instantiate(type);
             }
 
             //If we were unable to find an instantiator then
@@ -101,42 +112,13 @@ namespace PointyBoot.Core
         }
 
         /// <summary>
-        /// Uses a basic activation based on constructor discovered.
-        /// </summary>
-        /// <param name="type">Type of object to instantiate</param>
-        /// <param name="contextInfo">Context data to refer</param>
-        /// <returns></returns>
-        public object Instantiate(Type type, IDIContext contextInfo = null)
-        {
-            contextInfo ??= ContextInfo;
-            var constructor = GetInitializableConstructor(type);
-
-            if (constructor == null)
-                throw new ArgumentException("Np suitable constructor found. Need either Autowired or Default constructor");
-
-            var parameters = constructor.GetParameters();
-
-            //If no parameterized constructor then return plain instance
-            if (!parameters.Any())
-                return Activator.CreateInstance(type);
-
-            //Get primitive values if defined
-            var primVals = constructor.GetCustomAttribute<Autowired>().PrimitiveTypeValues;
-
-            //Else get instance of dependent instances
-            object[] paramInstances = SetParameters(contextInfo, parameters, primVals);
-
-            return Activator.CreateInstance(type, paramInstances);
-        }
-
-        /// <summary>
         /// Generates an activator function for the type and stores that for future use. 
         /// Thus better for performance for instances of the same type
         /// </summary>
         /// <param name="type">Type of object to instantiate</param>
         /// <param name="contextInfo">Context data to refer</param>
         /// <returns></returns>
-        public object Instantiate2(Type type, IDIContext contextInfo = null)
+        public object Instantiate(Type type, IDIContext contextInfo = null)
         {
             contextInfo ??= ContextInfo;
             var constructor = GetInitializableConstructor(type);
@@ -174,6 +156,37 @@ namespace PointyBoot.Core
         }
 
         /// <summary>
+        /// Uses a basic activation based on constructor discovered.
+        /// </summary>
+        /// <param name="type">Type of object to instantiate</param>
+        /// <param name="contextInfo">Context data to refer</param>
+        /// <returns></returns>
+        public object InstantiateBasic(Type type, IDIContext contextInfo = null)
+        {
+            contextInfo ??= ContextInfo;
+            var constructor = GetInitializableConstructor(type);
+
+            if (constructor == null)
+                throw new ArgumentException("Np suitable constructor found. Need either Autowired or Default constructor");
+
+            var parameters = constructor.GetParameters();
+
+            //If no parameterized constructor then return plain instance
+            if (!parameters.Any())
+                return Activator.CreateInstance(type);
+
+            //Get primitive values if defined
+            var primVals = constructor.GetCustomAttribute<Autowired>().PrimitiveTypeValues;
+
+            //Else get instance of dependent instances
+            object[] paramInstances = SetParameters(contextInfo, parameters, primVals);
+
+            return Activator.CreateInstance(type, paramInstances);
+        }
+
+        #region Private functions
+
+        /// <summary>
         /// Set parameters when wiring.
         /// </summary>
         /// <param name="contextInfo"></param>
@@ -208,19 +221,6 @@ namespace PointyBoot.Core
 
             return paramInstances;
         }
-
-        /// <summary>
-        /// New instantiator of generic type.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="currentContext"></param>
-        /// <returns></returns>
-        public T New<T>(IDIContext currentContext = null)
-        {
-            return (T)New(typeof(T), currentContext);
-        }
-
-        #region Private functions
 
         /// <summary>
         /// Get initialzable constructor.
@@ -264,66 +264,6 @@ namespace PointyBoot.Core
             return compiledActivator;
         }
 
-        /// <summary>
-        /// Builds an argumentless activator
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Still determining it's importance")]
-        private SpecificObjectActivator<T> BuildPrimitiveActivator<T>()
-        {
-            ParameterExpression param = Expression.Parameter(typeof(object[]), "args");
-
-            //Make a NewExpression that calls the ctor with the args we just created
-            NewExpression newExp = Expression.New(typeof(T));
-
-            //Create a lambda with the NewExpression as body and our param object[] as arg
-            LambdaExpression lambda = Expression.Lambda(typeof(SpecificObjectActivator<T>), newExp, param);
-
-            //Compile it
-            SpecificObjectActivator<T> compiled = (SpecificObjectActivator<T>)lambda.Compile();
-            return compiled;
-        }
-
-        #endregion
-
-        #region Undecided code
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Still determining it's importance")]
-        private object CallConstructor(Type type, params object[] argValues)
-        {
-            var ctor = type.GetConstructors().First();
-            ParameterInfo[] parameterInfo = ctor.GetParameters();
-            IEnumerable<Type> parameterTypes = parameterInfo.Select(p => p.ParameterType);
-
-            Expression[] args = new Expression[parameterInfo.Length];
-            ParameterExpression param = Expression.Parameter(typeof(object[]));
-
-            for (int i = 0; i < parameterInfo.Length; i++)
-                args[i] = Expression.Convert(Expression.ArrayIndex(param, Expression.Constant(i)), parameterInfo[i].ParameterType);
-
-            var lambda = Expression.Lambda(typeof(ObjectActivator), Expression.Convert(Expression.New(ctor, args), ctor.DeclaringType), param);
-            ObjectActivator compiledActivator = (ObjectActivator)lambda.Compile();
-
-            return compiledActivator(argValues);
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Still determining it's importance")]
-        private MethodInfo BuildGenericMethod(string methodName, Type context, Type genType)
-        {
-            MethodInfo method = context.GetMethod(methodName);
-            MethodInfo generic = method.MakeGenericMethod(genType);
-            return generic;
-        }
-
-        //private void InvokeCon(ConstructorInfo constructorInfo, ParameterInfo[] pi, object[] p, Type type)
-        //{
-        //    var mi = typeof(IOCProvider).GetMethod(nameof(GetObjectActivator2));
-        //    mi = mi.MakeGenericMethod(type);
-        //    var obj = mi.Invoke(constructorInfo, pi);
-        //    Type ctype = typeof(ObjectActivator2<>);
-        //    Type gtype = ctype.MakeGenericType(type);            
-        //}
         #endregion
     }
 }
