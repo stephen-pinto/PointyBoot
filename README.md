@@ -13,13 +13,12 @@ This project is inspired from the DI model of SpringBoot project. It does not in
 - Classes or Constructors
 - Functions [coming soon]
 
-Works with the basic use-cases and needs more improvements and handling for variouse usecases.
-
 ### Run and test
 This project is developed in VS2019 so you can use that or any latest version available. Or we can use VS Code editor with .NET developer toolset.
 
 ### Status
-Works with the primary use-case. Also contains performance tests in TestApp project.
+Works with the basic use-cases and needs more improvements and handling for various error cases.
+No support for Generics yet but would be supported eventually.
 
 ### Based on
 Plain C# with Reflection.
