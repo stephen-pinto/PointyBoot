@@ -1,20 +1,35 @@
-﻿using TestClass = TestApp.Test3.Class3;
+﻿using PointyBoot.Base;
+using PointyBootTest.TestData.Set1.B;
+using System;
+using System.Diagnostics;
 
 namespace TestApp
 {
     class Program
     {
-        static void Main()
+        private static void Test1()
         {
-            //PBContext dependencyManager = new PBContext();
-            //var obj = dependencyManager.Get<Test1.Class1>();
-            //obj.Test();
+            PointyBootDIService service = new PointyBootDIService();
+            ComponentProviderSample sample = new ComponentProviderSample();
+            service.RegisterComponentFactory(sample);
 
-            TestClass obj = new TestClass();
-            obj.Test();
-            
-            //OffTest test = new OffTest();
-            //test.Test();
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
+            AutowiredClass[] array = new AutowiredClass[1000];
+            for (int i = 0; i < 1000; i++)
+            {
+                array[0] = service.Get<AutowiredClass>();
+            }
+
+            sw.Stop();
+            Console.WriteLine($"Completed allocations with PBServiceProvider in {sw.ElapsedMilliseconds} ms");
+        }
+
+        static void Main(string[] args)
+        {
+            Test1();
+            //Console.WriteLine("Hello World!");
         }
     }
 }

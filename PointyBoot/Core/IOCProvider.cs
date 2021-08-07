@@ -1,6 +1,7 @@
 ﻿using PointyBoot.Attributes;
 using PointyBoot.Core.Context;
 using PointyBoot.Core.Interfaces;
+using PointyBoot.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,6 +47,11 @@ namespace PointyBoot.Core
             contextInfo ??= ContextInfo;
             var solidType = contextInfo.TypeMapping.ContainsKey(type) ? contextInfo.TypeMapping[type] : null;
 
+            if(!interContextSharedInfo.ObjectInfo.ContainsKey(type))
+            {
+                interContextSharedInfo.ObjectInfo.Add(type, new PBObjectInfo(type));
+            }
+
             //Check if we already have a singleton stored of this type (or solid type)
             if (contextInfo.SingletonStore.ContainsKey(type))
                 return contextInfo.SingletonStore[type];
@@ -84,7 +90,7 @@ namespace PointyBoot.Core
             if (instance == null)
                 throw new TypeAccessException($"Cannot instantiate type {type} as no factory or solid type defined.");
 
-            //Set properties
+            //Set properties            
             Wire(ref instance, type);
 
             return instance;
@@ -99,12 +105,12 @@ namespace PointyBoot.Core
         public void Wire(ref object instance, Type type, IDIContext contextInfo = null)
         {
             contextInfo = contextInfo ?? ContextInfo;
-            var properties = type.GetProperties().Where(prop => prop.IsDefined(typeof(Autowired), false));
+            var autowiredProps = interContextSharedInfo.ObjectInfo[type].AutowiredProperties;
 
-            if (!properties.Any())
+            if (!autowiredProps.Any())
                 return;
 
-            foreach (var prop in properties)
+            foreach (var prop in autowiredProps)
             {
                 //var attributes = prop.GetCustomAttributes(typeof(Autowired), true).FirstOrDefault() as Autowired;
                 prop.SetValue(instance, New(prop.PropertyType, contextInfo));
@@ -129,15 +135,15 @@ namespace PointyBoot.Core
             var parameters = constructor.GetParameters();
 
             ObjectActivator ObjActivatorForType;
-            if (interContextSharedInfo.ObjectActivators.ContainsKey(type))
+            if (interContextSharedInfo.ObjectInfo.ContainsKey(type) && interContextSharedInfo.ObjectInfo[type].Activator != null)
             {
-                ObjActivatorForType = interContextSharedInfo.ObjectActivators[type];
+                ObjActivatorForType = interContextSharedInfo.ObjectInfo[type].Activator;
             }
             else
             {
                 //TODO: Check if we can use BuildPrimitiveActivator here for parameterless constructor
                 ObjActivatorForType = BuildObjectActivator(constructor, parameters);
-                interContextSharedInfo.ObjectActivators.Add(type, ObjActivatorForType);
+                interContextSharedInfo.ObjectInfo[type].Activator = ObjActivatorForType;
             }
 
             //If no parameterized constructor then return plain instance
@@ -208,6 +214,7 @@ namespace PointyBoot.Core
 
                 if (parmType.IsPrimitive)
                 {
+                    //If it is a primitive type then instantiate with regular method activator
                     if (primVals != null && primVals.Length >= primValIndex)
                         paramInstances[i] = primVals[primValIndex++];
                     else
@@ -215,6 +222,7 @@ namespace PointyBoot.Core
                 }
                 else
                 {
+                    //Else use the recursive activation process
                     paramInstances[i] = New(parmType, contextInfo);
                 }
             }
@@ -250,6 +258,7 @@ namespace PointyBoot.Core
             ParameterExpression param = Expression.Parameter(typeof(object[]));
             Expression[] argsExp = new Expression[paramsInfo.Length];
 
+            //Create the array indexing expression for all the parameters
             for (int i = 0; i < paramsInfo.Length; i++)
                 argsExp[i] = Expression.Convert(Expression.ArrayIndex(param, Expression.Constant(i)), paramsInfo[i].ParameterType);
 

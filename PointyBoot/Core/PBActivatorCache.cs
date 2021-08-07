@@ -1,16 +1,19 @@
 ﻿using PointyBoot.Core.Interfaces;
+using PointyBoot.Core.Models;
 using System;
 using System.Collections.Generic;
 
 namespace PointyBoot.Core
-{   
+{
     public class PBActivatorCache : IActivatorStore
     {
-        public Dictionary<Type, ObjectActivator> ObjectActivators { get; set; }
+        /// TODO: Manage addition and removal of items using function and set the setters as private
+        
+        public Dictionary<Type, PBObjectInfo> ObjectInfo { get; set; }
 
         private PBActivatorCache()
         {
-            ObjectActivators = new Dictionary<Type, ObjectActivator>();
-        }        
+            ObjectInfo = new Dictionary<Type, PBObjectInfo>();
+        }
     }
 }
