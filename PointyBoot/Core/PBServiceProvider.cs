@@ -3,92 +3,62 @@ using System;
 
 namespace PointyBoot.Core
 {
-    [Obsolete("Dont need this class anymore")]
-    public class PBServiceProvider : IDIService, IDIContextBasedService
+    public class PBServiceProvider : IDIService
     {
+        private readonly IOCProvider instanceProvider;
+
         /// <summary>
         /// Context can be considered as a session which scopes the instances to a session.
         /// </summary>
-        private readonly IDIContext globalContext;
+        private readonly IDIContext currentContext;
 
-        public PBServiceProvider(IDIContext context)
+        public PBServiceProvider(IDIContext context, IOCProvider instanceProvider)
         {
-            globalContext = context;
+            currentContext = context;
+            this.instanceProvider = instanceProvider;
         }
 
         public T Get<T>()
         {
-            return globalContext.Get<T>();
+            return instanceProvider.New<T>(currentContext);
         }
 
-        public T Get<T>(IDIContext context)
-        {
-            return context.Get<T>();
-        }
-
-        public void AddSingleton<T>()
-        {
-            globalContext.AddSingleton<T>();            
-        }
-
-        public void AddSingleton<T>(IDIContext context)
-        {
-            context.AddSingleton<T>();
-        }
-
-        public void AddSingleton<T>(object instance)
-        {
-            globalContext.AddSingleton<T>(instance);
-        }
-
-        public void AddSingleton<T>(IDIContext context, object instance)
-        {
-            context.AddSingleton<T>(instance);
-        }
-
-        public void AddSingleton<T>(Func<T> instantiatorFunction)
-        {
-            globalContext.AddSingleton(instantiatorFunction);
-        }
-
-        public void AddSingleton<T>(IDIContext context, Func<T> instantiatorFunction)
-        {
-            context.AddSingleton(instantiatorFunction);
-        }
-
-        public void RegisterFactory<T>(Func<T> instantiatorFunction)
+        public void RegisterComponentFactory<T>(T obj)
             where T : class
         {
-            globalContext.RegisterFactory(instantiatorFunction);
+            currentContext.LoadComponentFactory(obj);
         }
 
-        public void RegisterFactory<T>(IDIContext context, Func<T> factory)
+        public void RegisterFactory<T>(Func<T> factory)
             where T : class
         {
-            context.RegisterFactory(factory);
-        }
-
-        public void RegisterComponentFactory<T>(T instance = null)
-            where T : class
-        {
-            if (instance == null)
-                instance = globalContext.Get<T>();
-
-            globalContext.RegisterComponentFactory(instance);
-        }
-
-        public void RegisterComponentFactory<T>(IDIContext context, T instance = null)
-             where T : class
-        {
-            if (instance == null)
-                instance = globalContext.Get<T>();
-
-            context.RegisterComponentFactory(instance);
+            currentContext.AddFactoryFunction(typeof(T), factory);
         }
 
         public void AddMapping<IntfType, ActType>() where ActType : IntfType
         {
-            throw new NotImplementedException();
+            if (!currentContext.TypeMapping.ContainsKey(typeof(IntfType)))
+                currentContext.AddTypeMapping(typeof(IntfType), typeof(ActType));
+            else
+                throw new ArgumentException($"Mapping for type {typeof(IntfType).Name} is already defined");
+        }
+
+        public void AddSingleton<T>()
+        {
+            currentContext.AddSingleton(typeof(T), Get<T>());
+        }
+
+        public void AddSingleton<T>(object instance)
+        {
+            currentContext.AddSingleton(typeof(T), instance);
+        }
+
+        public void AddSingleton<T>(Func<T> instantiatorFunction)
+        {
+            if (instantiatorFunction is null)
+                throw new ArgumentNullException(nameof(instantiatorFunction));
+
+            currentContext.AddSingleton(typeof(T), instantiatorFunction);
         }
     }
 }

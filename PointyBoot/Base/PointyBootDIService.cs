@@ -8,58 +8,57 @@ namespace PointyBoot.Base
 {
     public class PointyBootDIService : IDIProviderService
     {
-        private readonly IDIContext currentContext;
+        private readonly IDIService serviceProvider;
 
-        public PointyBootDIService(IDIContext context = null)
+        public PointyBootDIService()
         {
-            if (context == null)
-                currentContext = PBServicesFactory.GetGlobalContext();
+            serviceProvider = PBServicesFactory.GetDefaultServiceProvider();
         }
 
         public IDIProviderService AddMap<IntfType, ActType>() where ActType : IntfType
         {
-            currentContext.AddMapping<IntfType, ActType>();
+            serviceProvider.AddMapping<IntfType, ActType>();
             return this;
         }
 
         public IDIProviderService AddSingleton<T>()
         {
-            currentContext.AddSingleton<T>();
+            serviceProvider.AddSingleton<T>();
             return this;
         }
 
         public IDIProviderService AddSingleton<T>(object instanceObj)
         {
-            currentContext.AddSingleton<T>(instanceObj);
+            serviceProvider.AddSingleton<T>(instanceObj);
             return this;
         }
 
         public IDIProviderService AddSingleton<T>(Func<T> instantiatorFunction)
         {
-            currentContext.AddSingleton(instantiatorFunction);
+            serviceProvider.AddSingleton(instantiatorFunction);
             return this;
         }
 
         public T Get<T>()
         {
-            return currentContext.Get<T>();
+            return serviceProvider.Get<T>();
         }
 
         public IDIProviderService RegisterComponentFactory<T>(T instance) where T : class
         {
-            currentContext.RegisterComponentFactory(instance);
+            serviceProvider.RegisterComponentFactory(instance);
             return this;
         }
 
         public IDIProviderService RegisterFactory<T>(Func<T> factory) where T : class
         {
-            currentContext.RegisterFactory(factory);
+            serviceProvider.RegisterFactory(factory);
             return this;
         }
 
         public IDIProviderService StartNewSession()
         {
-            return new PointyBootDIService(PBContextFactory.GetNewContext());
+            return new PointyBootDIService();
         }
     }
 }

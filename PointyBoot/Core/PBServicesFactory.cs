@@ -9,16 +9,22 @@ namespace PointyBoot.Core
     public static class PBServicesFactory
     {
         private static Lazy<PBActivatorCache> activatorStore = new Lazy<PBActivatorCache>();
-        private static Lazy<IDIContext> context = new Lazy<IDIContext>(() => PBContextFactory.GetNewContext());
+        private static Lazy<IDIContext> globalContext = new Lazy<IDIContext>(() => PBContextFactory.GetNewContext());
 
         internal static IDIContext GetGlobalContext()
         {
-            return context.Value;
+            return globalContext.Value;
         }
 
-        public static IDIService GetServiceProvider()
+        public static IDIService GetDefaultServiceProvider()
         {
-            var obj = new PBServiceProvider(context.Value);
+            var obj = new PBServiceProvider(globalContext.Value, GetIOCProvider());
+            return obj;
+        }
+
+        public static IDIService GetServiceProviderForContext(IDIContext context)
+        {
+            var obj = new PBServiceProvider(context, GetIOCProvider());
             return obj;
         }
 
@@ -29,7 +35,7 @@ namespace PointyBoot.Core
 
         public static IOCProvider GetIOCProvider()
         {
-            return new IOCProvider(context.Value);
+            return new IOCProvider();
         }
     }
 }

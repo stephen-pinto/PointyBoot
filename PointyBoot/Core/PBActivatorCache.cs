@@ -11,7 +11,7 @@ namespace PointyBoot.Core
         
         public Dictionary<Type, PBObjectInfo> ObjectInfo { get; set; }
 
-        private PBActivatorCache()
+        public PBActivatorCache()
         {
             ObjectInfo = new Dictionary<Type, PBObjectInfo>();
         }

@@ -13,6 +13,7 @@ namespace PointyBoot.Core.Context
 
         public PBContextInfo()
         {
+            TypeMapping = new Dictionary<Type, Type>();
             FactoryFunctionStore = new Dictionary<Type, Func<object>>();
             SingletonStore = new Dictionary<Type, object>();
         }

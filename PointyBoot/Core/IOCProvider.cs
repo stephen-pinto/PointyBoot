@@ -17,11 +17,8 @@ namespace PointyBoot.Core
     {
         private readonly IActivatorStore interContextSharedInfo;
 
-        public IDIContext ContextInfo { get; private set; }
-
-        public IOCProvider(IDIContext contextInfo)
+        public IOCProvider()
         {
-            ContextInfo = contextInfo;
             interContextSharedInfo = PBServicesFactory.GetGlobalActivatorCache();
         }
 
@@ -29,23 +26,22 @@ namespace PointyBoot.Core
         /// New instantiator of generic type.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="currentContext"></param>
+        /// <param name="context"></param>
         /// <returns></returns>
-        public T New<T>(IDIContext currentContext = null)
+        public T New<T>(IDIContext context)
         {
-            return (T)New(typeof(T), currentContext);
+            return (T)New(context, typeof(T));
         }
 
         /// <summary>
         /// Creates new instance by Type. If for the given context (or default context) the initializer is specified then use that.
         /// </summary>
+        /// <param name="context"></param>
         /// <param name="type"></param>
-        /// <param name="contextInfo"></param>
         /// <returns></returns>
-        public object New(Type type, IDIContext contextInfo = null)
+        public object New(IDIContext context, Type type)
         {
-            contextInfo ??= ContextInfo;
-            var solidType = contextInfo.TypeMapping.ContainsKey(type) ? contextInfo.TypeMapping[type] : null;
+            var solidType = context.TypeMapping.ContainsKey(type) ? context.TypeMapping[type] : null;
 
             if(!interContextSharedInfo.ObjectInfo.ContainsKey(type))
             {
@@ -53,37 +49,37 @@ namespace PointyBoot.Core
             }
 
             //Check if we already have a singleton stored of this type (or solid type)
-            if (contextInfo.SingletonStore.ContainsKey(type))
-                return contextInfo.SingletonStore[type];
-            else if (solidType != null && contextInfo.SingletonStore.ContainsKey(type))
-                return contextInfo.SingletonStore[solidType];
+            if (context.SingletonStore.ContainsKey(type))
+                return context.SingletonStore[type];
+            else if (solidType != null && context.SingletonStore.ContainsKey(type))
+                return context.SingletonStore[solidType];
 
             //Check if we already have a factory function for this type (or solid type)
-            if (contextInfo.FactoryFunctionStore.ContainsKey(type))
-                return contextInfo.FactoryFunctionStore[type];
-            else if (solidType != null && contextInfo.FactoryFunctionStore.ContainsKey(solidType))
-                return contextInfo.FactoryFunctionStore[solidType];
+            if (context.FactoryFunctionStore.ContainsKey(type))
+                return context.FactoryFunctionStore[type];
+            else if (solidType != null && context.FactoryFunctionStore.ContainsKey(solidType))
+                return context.FactoryFunctionStore[solidType];
 
             //Instantiate
             object instance = null;
 
             //If there is factory defined for this interface/class then use that else use regular
-            if (contextInfo.FactoryFunctionStore.ContainsKey(type))
+            if (context.FactoryFunctionStore.ContainsKey(type))
             {
-                instance = contextInfo.FactoryFunctionStore[type].Invoke();
+                instance = context.FactoryFunctionStore[type].Invoke();
             }
-            else if (solidType != null && contextInfo.FactoryFunctionStore.ContainsKey(solidType))
+            else if (solidType != null && context.FactoryFunctionStore.ContainsKey(solidType))
             {
-                instance = contextInfo.FactoryFunctionStore[solidType].Invoke();
+                instance = context.FactoryFunctionStore[solidType].Invoke();
             }
             else
             {
                 //If solid type available then we wont be able to instantiate with 'type' anyway
                 //Use 'solidType' then instead otherwise use the 'type'
                 if (solidType != null)
-                    instance = Instantiate(solidType);
+                    instance = Instantiate(context, solidType);
                 else
-                    instance = Instantiate(type);
+                    instance = Instantiate(context, type);
             }
 
             //If we were unable to find an instantiator then
@@ -91,7 +87,7 @@ namespace PointyBoot.Core
                 throw new TypeAccessException($"Cannot instantiate type {type} as no factory or solid type defined.");
 
             //Set properties            
-            Wire(ref instance, type);
+            Wire(context, ref instance, type);
 
             return instance;
         }
@@ -99,12 +95,11 @@ namespace PointyBoot.Core
         /// <summary>
         /// We wire the instances with properties or functions here.
         /// </summary>
+        /// <param name="context"></param>
         /// <param name="instance"></param>
         /// <param name="type"></param>
-        /// <param name="contextInfo"></param>
-        public void Wire(ref object instance, Type type, IDIContext contextInfo = null)
+        public void Wire(IDIContext context, ref object instance, Type type)
         {
-            contextInfo = contextInfo ?? ContextInfo;
             var autowiredProps = interContextSharedInfo.ObjectInfo[type].AutowiredProperties;
 
             if (!autowiredProps.Any())
@@ -113,7 +108,7 @@ namespace PointyBoot.Core
             foreach (var prop in autowiredProps)
             {
                 //var attributes = prop.GetCustomAttributes(typeof(Autowired), true).FirstOrDefault() as Autowired;
-                prop.SetValue(instance, New(prop.PropertyType, contextInfo));
+                prop.SetValue(instance, New(context, prop.PropertyType));
             }
         }
 
@@ -121,12 +116,11 @@ namespace PointyBoot.Core
         /// Generates an activator function for the type and stores that for future use. 
         /// Thus better for performance for instances of the same type
         /// </summary>
-        /// <param name="type">Type of object to instantiate</param>
-        /// <param name="contextInfo">Context data to refer</param>
+        /// <param name="context"></param>
+        /// <param name="type"></param>
         /// <returns></returns>
-        public object Instantiate(Type type, IDIContext contextInfo = null)
+        public object Instantiate(IDIContext context, Type type)
         {
-            contextInfo ??= ContextInfo;
             var constructor = GetInitializableConstructor(type);
 
             if (constructor == null)
@@ -156,7 +150,7 @@ namespace PointyBoot.Core
             var primVals = constructor.GetCustomAttribute<Autowired>().PrimitiveTypeValues;
 
             //Else get instance of dependent instances
-            object[] paramInstances = SetParameters(contextInfo, parameters, primVals);
+            object[] paramInstances = SetParameters(context, parameters, primVals);
 
             return ObjActivatorForType(paramInstances);
         }
@@ -164,12 +158,11 @@ namespace PointyBoot.Core
         /// <summary>
         /// Uses a basic activation based on constructor discovered.
         /// </summary>
-        /// <param name="type">Type of object to instantiate</param>
-        /// <param name="contextInfo">Context data to refer</param>
+        /// <param name="context"></param>
+        /// <param name="type"></param>
         /// <returns></returns>
-        public object InstantiateBasic(Type type, IDIContext contextInfo = null)
+        public object InstantiateBasic(IDIContext context, Type type)
         {
-            contextInfo ??= ContextInfo;
             var constructor = GetInitializableConstructor(type);
 
             if (constructor == null)
@@ -185,7 +178,7 @@ namespace PointyBoot.Core
             var primVals = constructor.GetCustomAttribute<Autowired>().PrimitiveTypeValues;
 
             //Else get instance of dependent instances
-            object[] paramInstances = SetParameters(contextInfo, parameters, primVals);
+            object[] paramInstances = SetParameters(context, parameters, primVals);
 
             return Activator.CreateInstance(type, paramInstances);
         }
@@ -195,11 +188,11 @@ namespace PointyBoot.Core
         /// <summary>
         /// Set parameters when wiring.
         /// </summary>
-        /// <param name="contextInfo"></param>
+        /// <param name="context"></param>
         /// <param name="parameters"></param>
         /// <param name="primVals"></param>
         /// <returns></returns>
-        private object[] SetParameters(IDIContext contextInfo, ParameterInfo[] parameters, object[] primVals)
+        private object[] SetParameters(IDIContext context, ParameterInfo[] parameters, object[] primVals)
         {
             //Else get instance of dependent instances
             object[] paramInstances = new object[parameters.Length];
@@ -223,7 +216,7 @@ namespace PointyBoot.Core
                 else
                 {
                     //Else use the recursive activation process
-                    paramInstances[i] = New(parmType, contextInfo);
+                    paramInstances[i] = New(context, parmType);
                 }
             }
 
