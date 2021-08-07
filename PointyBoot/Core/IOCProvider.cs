@@ -1,9 +1,7 @@
 ﻿using PointyBoot.Attributes;
-using PointyBoot.Core.Context;
 using PointyBoot.Core.Interfaces;
 using PointyBoot.Core.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -44,6 +42,7 @@ namespace PointyBoot.Core
             var solidType = context.TypeMapping.ContainsKey(type) ? context.TypeMapping[type] : null;
 
             //Check if we already have a singleton stored of this type (or solid type)
+            //TODO: Check we also need to wire this one
             if (context.SingletonStore.ContainsKey(type))
                 return context.SingletonStore[type];
             else if (solidType != null && context.SingletonStore.ContainsKey(type))
@@ -51,7 +50,7 @@ namespace PointyBoot.Core
 
             if (!interContextSharedInfo.ObjectInfo.ContainsKey(type))
                 interContextSharedInfo.ObjectInfo.Add(type, new PBObjectInfo(type));
-           
+
             //Instantiate
             object instance = null;
 

@@ -12,10 +12,5 @@ namespace PointyBoot.Core.Context
 
             return new PBContext(contextInfo);
         }
-
-        public static PBContextHelper GetContextHelper()
-        {
-            return new PBContextHelper();
-        }
     }
 }
