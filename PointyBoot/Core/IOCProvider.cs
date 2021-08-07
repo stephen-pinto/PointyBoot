@@ -127,7 +127,7 @@ namespace PointyBoot.Core
             else
             {
                 //TODO: Check if we can use BuildPrimitiveActivator here for parameterless constructor
-                ObjActivatorForType = BuildObjectActivator(constructor, parameters);
+                ObjActivatorForType = IOCHelper.BuildObjectActivator(constructor, parameters);
                 interContextSharedInfo.ObjectInfo[type].Activator = ObjActivatorForType;
             }
 
@@ -228,33 +228,6 @@ namespace PointyBoot.Core
             defaultConstructor = constructors.Where(c => c.IsDefined(typeof(Autowired)) || c.GetParameters().Length == 0).FirstOrDefault();
 
             return defaultConstructor;
-        }
-
-        /// <summary>
-        /// Builds a argument based activator
-        /// </summary>
-        /// <param name="ctor"></param>
-        /// <param name="paramsInfo"></param>
-        /// <returns></returns>
-        private ObjectActivator BuildObjectActivator(ConstructorInfo ctor, ParameterInfo[] paramsInfo)
-        {
-            //Create a single param of type object[]
-            ParameterExpression param = Expression.Parameter(typeof(object[]));
-            Expression[] argsExp = new Expression[paramsInfo.Length];
-
-            //Create the array indexing expression for all the parameters
-            for (int i = 0; i < paramsInfo.Length; i++)
-                argsExp[i] = Expression.Convert(Expression.ArrayIndex(param, Expression.Constant(i)), paramsInfo[i].ParameterType);
-
-            //Make a NewExpression that calls the ctor with the args we just created
-            NewExpression newExp = Expression.New(ctor, argsExp);
-
-            //Create a lambda with the NewExpression as body and our param object[] as arg
-            LambdaExpression lambda = Expression.Lambda(typeof(ObjectActivator), newExp, param);
-
-            //Compile it
-            ObjectActivator compiledActivator = (ObjectActivator)lambda.Compile();
-            return compiledActivator;
         }
 
         #endregion

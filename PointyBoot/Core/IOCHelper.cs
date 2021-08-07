@@ -6,9 +6,36 @@ using System.Reflection;
 
 namespace PointyBoot.Core
 {
-    internal class IOCHelper
+    internal static class IOCHelper
     {
-        public SpecificObjectActivator<T> BuildPrimitiveActivator<T>()
+        /// <summary>
+        /// Builds a argument based activator
+        /// </summary>
+        /// <param name="ctor"></param>
+        /// <param name="paramsInfo"></param>
+        /// <returns></returns>
+        public static ObjectActivator BuildObjectActivator(ConstructorInfo ctor, ParameterInfo[] paramsInfo)
+        {
+            //Create a single param of type object[]
+            ParameterExpression param = Expression.Parameter(typeof(object[]));
+            Expression[] argsExp = new Expression[paramsInfo.Length];
+
+            //Create the array indexing expression for all the parameters
+            for (int i = 0; i < paramsInfo.Length; i++)
+                argsExp[i] = Expression.Convert(Expression.ArrayIndex(param, Expression.Constant(i)), paramsInfo[i].ParameterType);
+
+            //Make a NewExpression that calls the ctor with the args we just created
+            NewExpression newExp = Expression.New(ctor, argsExp);
+
+            //Create a lambda with the NewExpression as body and our param object[] as arg
+            LambdaExpression lambda = Expression.Lambda(typeof(ObjectActivator), newExp, param);
+
+            //Compile it
+            ObjectActivator compiledActivator = (ObjectActivator)lambda.Compile();
+            return compiledActivator;
+        }
+
+        public static SpecificObjectActivator<T> BuildPrimitiveActivator<T>()
         {
             ParameterExpression param = Expression.Parameter(typeof(object[]), "args");
 
@@ -23,7 +50,7 @@ namespace PointyBoot.Core
             return compiled;
         }
 
-        public object CallConstructor(Type type, params object[] argValues)
+        public static object CallConstructor(Type type, params object[] argValues)
         {
             var ctor = type.GetConstructors().First();
             ParameterInfo[] parameterInfo = ctor.GetParameters();
@@ -41,7 +68,7 @@ namespace PointyBoot.Core
             return compiledActivator(argValues);
         }
 
-        public MethodInfo BuildGenericMethod(string methodName, Type context, Type genType)
+        public static MethodInfo BuildGenericMethod(string methodName, Type context, Type genType)
         {
             MethodInfo method = context.GetMethod(methodName);
             MethodInfo generic = method.MakeGenericMethod(genType);
