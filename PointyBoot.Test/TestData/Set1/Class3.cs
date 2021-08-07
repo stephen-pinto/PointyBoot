@@ -34,7 +34,7 @@ namespace PointyBootTest.TestData.Set1.C
     }
 
     [PointyComponentFactory]
-    public class ComponentProviderSample1
+    public class ComponentProviderSample
     {
         [PointyComponentProviderFunc]
         public ComponentSample1 ServeComponent()
@@ -60,11 +60,11 @@ namespace PointyBootTest.TestData.Set1.C
         [Autowired]
         public ComponentSample2 Prop3 { get; set; }
 
-        public void Test()
+        public void Print()
         {
             Debug.WriteLine($"Prop 1: \n{Prop1}");
             Debug.WriteLine($"Prop 2: \n{Prop2}");
-            Debug.WriteLine($"Prop 3: \n{Prop3}");
+            Debug.WriteLine($"Prop 3: \n{Prop3}");            
         }
     }
 

@@ -43,23 +43,15 @@ namespace PointyBoot.Core
         {
             var solidType = context.TypeMapping.ContainsKey(type) ? context.TypeMapping[type] : null;
 
-            if(!interContextSharedInfo.ObjectInfo.ContainsKey(type))
-            {
-                interContextSharedInfo.ObjectInfo.Add(type, new PBObjectInfo(type));
-            }
-
             //Check if we already have a singleton stored of this type (or solid type)
             if (context.SingletonStore.ContainsKey(type))
                 return context.SingletonStore[type];
             else if (solidType != null && context.SingletonStore.ContainsKey(type))
                 return context.SingletonStore[solidType];
 
-            //Check if we already have a factory function for this type (or solid type)
-            if (context.FactoryFunctionStore.ContainsKey(type))
-                return context.FactoryFunctionStore[type];
-            else if (solidType != null && context.FactoryFunctionStore.ContainsKey(solidType))
-                return context.FactoryFunctionStore[solidType];
-
+            if (!interContextSharedInfo.ObjectInfo.ContainsKey(type))
+                interContextSharedInfo.ObjectInfo.Add(type, new PBObjectInfo(type));
+           
             //Instantiate
             object instance = null;
 
