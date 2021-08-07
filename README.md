@@ -13,7 +13,7 @@ This project is inspired from the DI model of SpringBoot project. It does not in
 - Classes or Constructors
 - Functions [coming soon]
 
-### Support
+### Features
 - Supports session based DI service with Transient feature (lasting only for a session) feature like ASP.NET Core DI.This is facilitated by PBContext.
 - Each session (context) can have its own factory and instance to interface mapping.
 - Factory function and factory classes with automatic ditection of serving types.
