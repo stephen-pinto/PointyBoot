@@ -13,11 +13,18 @@ This project is inspired from the DI model of SpringBoot project. It does not in
 - Classes or Constructors
 - Functions [coming soon]
 
+### Support
+- Supports session based DI service with Transient feature (lasting only for a session) feature like ASP.NET Core DI.This is facilitated by PBContext.
+- Each session (context) can have its own factory and instance to interface mapping.
+- Factory function and factory classes with automatic ditection of serving types.
+- Support for Singleton.
+
 ### Run and test
 This project is developed in VS2019 so you can use that or any latest version available. Or we can use VS Code editor with .NET developer toolset.
 
 ### Status
 Works with the basic use-cases and needs more improvements and handling for various error cases.
+Supports out of the box sessions to implement one's one Transient (lasting only for a session) feature like ASP.NET Core DI. This is facilitated by PBContext.
 No support for Generics yet but would be supported eventually.
 
 ### Based on
