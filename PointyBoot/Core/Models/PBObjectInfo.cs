@@ -12,7 +12,7 @@ namespace PointyBoot.Core.Models
 
         public Type BaseType { get; private set; }
 
-        public ObjectActivator Activator { get; set; }
+        public GenericActivator Activator { get; set; }
 
         public IReadOnlyList<PropertyInfo> AutowiredProperties { get => autowiredProperties; }
 

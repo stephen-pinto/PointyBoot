@@ -14,7 +14,7 @@ namespace PointyBoot.Core
         /// <param name="ctor"></param>
         /// <param name="paramsInfo"></param>
         /// <returns></returns>
-        public static ObjectActivator BuildObjectActivator(ConstructorInfo ctor, ParameterInfo[] paramsInfo)
+        public static GenericActivator BuildObjectActivator(ConstructorInfo ctor, ParameterInfo[] paramsInfo)
         {
             //Create a single param of type object[]
             ParameterExpression param = Expression.Parameter(typeof(object[]));
@@ -28,14 +28,14 @@ namespace PointyBoot.Core
             NewExpression newExp = Expression.New(ctor, argsExp);
 
             //Create a lambda with the NewExpression as body and our param object[] as arg
-            LambdaExpression lambda = Expression.Lambda(typeof(ObjectActivator), newExp, param);
+            LambdaExpression lambda = Expression.Lambda(typeof(GenericActivator), newExp, param);
 
             //Compile it
-            ObjectActivator compiledActivator = (ObjectActivator)lambda.Compile();
+            GenericActivator compiledActivator = (GenericActivator)lambda.Compile();
             return compiledActivator;
         }
 
-        public static SpecificObjectActivator<T> BuildPrimitiveActivator<T>()
+        public static StronglyTypedActivator<T> BuildPrimitiveActivator<T>()
         {
             ParameterExpression param = Expression.Parameter(typeof(object[]), "args");
 
@@ -43,10 +43,10 @@ namespace PointyBoot.Core
             NewExpression newExp = Expression.New(typeof(T));
 
             //Create a lambda with the NewExpression as body and our param object[] as arg
-            LambdaExpression lambda = Expression.Lambda(typeof(SpecificObjectActivator<T>), newExp, param);
+            LambdaExpression lambda = Expression.Lambda(typeof(StronglyTypedActivator<T>), newExp, param);
 
             //Compile it
-            SpecificObjectActivator<T> compiled = (SpecificObjectActivator<T>)lambda.Compile();
+            StronglyTypedActivator<T> compiled = (StronglyTypedActivator<T>)lambda.Compile();
             return compiled;
         }
 
@@ -62,8 +62,8 @@ namespace PointyBoot.Core
             for (int i = 0; i < parameterInfo.Length; i++)
                 args[i] = Expression.Convert(Expression.ArrayIndex(param, Expression.Constant(i)), parameterInfo[i].ParameterType);
 
-            var lambda = Expression.Lambda(typeof(ObjectActivator), Expression.Convert(Expression.New(ctor, args), ctor.DeclaringType), param);
-            ObjectActivator compiledActivator = (ObjectActivator)lambda.Compile();
+            var lambda = Expression.Lambda(typeof(GenericActivator), Expression.Convert(Expression.New(ctor, args), ctor.DeclaringType), param);
+            GenericActivator compiledActivator = (GenericActivator)lambda.Compile();
 
             return compiledActivator(argValues);
         }

@@ -1,5 +1,5 @@
 ﻿namespace PointyBoot.Core
 {
-    public delegate object ObjectActivator(params object[] args);
-    public delegate T SpecificObjectActivator<T>(params object[] args);
+    public delegate object GenericActivator(params object[] args);
+    public delegate T StronglyTypedActivator<T>(params object[] args);
 }

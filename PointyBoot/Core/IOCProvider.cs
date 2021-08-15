@@ -119,22 +119,22 @@ namespace PointyBoot.Core
 
             var parameters = constructor.GetParameters();
 
-            ObjectActivator ObjActivatorForType;
+            GenericActivator objActivator;
             if (interContextSharedInfo.ObjectInfo.ContainsKey(type) && interContextSharedInfo.ObjectInfo[type].Activator != null)
             {
-                ObjActivatorForType = interContextSharedInfo.ObjectInfo[type].Activator;
+                objActivator = interContextSharedInfo.ObjectInfo[type].Activator;
             }
             else
             {
                 //TODO: Check if we can use BuildPrimitiveActivator here for parameterless constructor
-                ObjActivatorForType = IOCHelper.BuildObjectActivator(constructor, parameters);
-                interContextSharedInfo.ObjectInfo[type].Activator = ObjActivatorForType;
+                objActivator = IOCHelper.BuildObjectActivator(constructor, parameters);
+                interContextSharedInfo.ObjectInfo[type].Activator = objActivator;
             }
 
             //If no parameterized constructor then return plain instance
             if (!parameters.Any())
             {
-                return ObjActivatorForType();
+                return objActivator();
             }
 
             //Get primitive values if defined
@@ -143,7 +143,7 @@ namespace PointyBoot.Core
             //Else get instance of dependent instances
             object[] paramInstances = SetParameters(context, parameters, primVals);
 
-            return ObjActivatorForType(paramInstances);
+            return objActivator(paramInstances);
         }
 
         /// <summary>
