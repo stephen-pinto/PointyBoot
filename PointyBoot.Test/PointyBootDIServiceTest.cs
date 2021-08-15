@@ -23,7 +23,7 @@ namespace PointyBootTest
             AutowiredClass[] array = new AutowiredClass[1000];
             for (int i = 0; i < 1000; i++)
             {
-                array[0] = service.Get<AutowiredClass>();
+                array[i] = service.Get<AutowiredClass>();
             }
 
             sw.Stop();

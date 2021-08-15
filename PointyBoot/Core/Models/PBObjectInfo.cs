@@ -14,6 +14,8 @@ namespace PointyBoot.Core.Models
 
         public GenericActivator Activator { get; set; }
 
+        public Delegate PropertySetterDelegate { get; set; }
+
         public IReadOnlyList<PropertyInfo> AutowiredProperties { get => autowiredProperties; }
 
         public PBObjectInfo(Type type)

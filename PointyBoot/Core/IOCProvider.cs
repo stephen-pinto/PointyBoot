@@ -91,16 +91,26 @@ namespace PointyBoot.Core
         /// <param name="type"></param>
         public void Wire(IDIContext context, ref object instance, Type type)
         {
-            var autowiredProps = interContextSharedInfo.ObjectInfo[type].AutowiredProperties;
+            var info = interContextSharedInfo.ObjectInfo[type];
 
-            if (!autowiredProps.Any())
+            if (!info.AutowiredProperties.Any())
                 return;
 
-            foreach (var prop in autowiredProps)
+            //If Property setting delegate is not ready than build it first
+            if (info.PropertySetterDelegate == null)
             {
-                //var attributes = prop.GetCustomAttributes(typeof(Autowired), true).FirstOrDefault() as Autowired;
-                prop.SetValue(instance, New(context, prop.PropertyType));
+                var lamdaExpr = IOCHelper.BuildPropertySetterFunction(type, info.AutowiredProperties.ToArray());
+                info.PropertySetterDelegate = lamdaExpr.Compile();
             }
+
+            var propInstances = new object[info.AutowiredProperties.Count];
+
+            //Get instance of all the concerned properties
+            for (int i = 0; i < info.AutowiredProperties.Count; i++)
+                propInstances[i] = New(context, info.AutowiredProperties[i].PropertyType);
+
+            //Call the delegate that sets all the concerned properties            
+            info.PropertySetterDelegate.DynamicInvoke(instance, propInstances);
         }
 
         /// <summary>
