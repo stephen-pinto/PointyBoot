@@ -29,3 +29,42 @@ No support for Generics yet but would be supported eventually.
 
 ### Based on
 Plain C# with Reflection.
+
+### Example usage
+
+Autowired classes can be defined as:
+
+```csharp
+ public class AutowiredClass
+ {
+      [Autowired]
+      public CoordA Prop1 { get; set; }
+
+      [Autowired]
+      public Area Prop2 { get; set; }
+
+      [Autowired]
+      public ComponentSample2 Prop3 { get; set; }
+ }
+```
+
+Autowiring factory can be defined as:
+
+```csharp
+[PointyComponentFactory]
+public class ComponentProviderSample
+{
+      [PointyComponentProviderFunc]
+      public ComponentSample1 ServeComponent()
+      {
+            return new ComponentSample1();
+      }
+
+      [PointyComponentProviderFunc(10001)] //With default value
+      public ComponentSample2 ServeComponent(int x)
+      {
+            return new ComponentSample2(x);
+      }
+}
+
+```
