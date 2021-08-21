@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace PointyBoot.Core
 {
-    internal static class IOCHelper
+    public static class IOCHelper
     {
         /// <summary>
         /// Builds a argument based activator
@@ -17,7 +17,7 @@ namespace PointyBoot.Core
         public static GenericActivator BuildObjectActivator(ConstructorInfo ctor, ParameterInfo[] paramsInfo)
         {
             //Create a single param of type object[]
-            ParameterExpression param = Expression.Parameter(typeof(object[]));
+            var param = Expression.Parameter(typeof(object[]));
             Expression[] argsExp = new Expression[paramsInfo.Length];
 
             //Create the array indexing expression for all the parameters
@@ -25,31 +25,72 @@ namespace PointyBoot.Core
                 argsExp[i] = Expression.Convert(Expression.ArrayIndex(param, Expression.Constant(i)), paramsInfo[i].ParameterType);
 
             //Make a NewExpression that calls the ctor with the args we just created
-            NewExpression newExp = Expression.New(ctor, argsExp);
+            var newExp = Expression.New(ctor, argsExp);
 
             //Create a lambda with the NewExpression as body and our param object[] as arg
-            LambdaExpression lambda = Expression.Lambda(typeof(GenericActivator), newExp, param);
+            var lambda = Expression.Lambda(typeof(GenericActivator), newExp, param);
 
             //Compile it
             GenericActivator compiledActivator = (GenericActivator)lambda.Compile();
             return compiledActivator;
         }
 
+        /// <summary>
+        /// Build primitive activator
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static StronglyTypedActivator<T> BuildPrimitiveActivator<T>()
         {
-            ParameterExpression param = Expression.Parameter(typeof(object[]), "args");
+            var param = Expression.Parameter(typeof(object[]), "args");
 
             //Make a NewExpression that calls the ctor with the args we just created
-            NewExpression newExp = Expression.New(typeof(T));
+            var newExp = Expression.New(typeof(T));
 
             //Create a lambda with the NewExpression as body and our param object[] as arg
-            LambdaExpression lambda = Expression.Lambda(typeof(StronglyTypedActivator<T>), newExp, param);
+            var lambda = Expression.Lambda(typeof(StronglyTypedActivator<T>), newExp, param);
 
             //Compile it
             StronglyTypedActivator<T> compiled = (StronglyTypedActivator<T>)lambda.Compile();
             return compiled;
         }
 
+        /// <summary>
+        /// This function builds a simple property setting lamda function for wiring.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="propertyInfos"></param>
+        /// <returns></returns>
+        public static LambdaExpression BuildPropertySetterFunction(Type type, PropertyInfo[] propertyInfos)
+        {
+            //Define parameters for the lamda function
+            var instance = Expression.Parameter(type, "obj");
+            var propertyValues = Expression.Parameter(typeof(object[]), "instances");
+
+            //TODO: Check if using this gives better performance
+            //MemberAssignment[] assignments = new MemberAssignment[propertyInfos.Count()];
+            //for (int i = 0; i < propertyInfos.Count(); i++)
+            //    assignments[i] = Expression.Bind(propertyInfos[i], Expression.Convert(Expression.ArrayIndex(propertyValues, Expression.Constant(i)), propertyInfos[i].PropertyType));
+
+            Expression[] assignmentExpressions = new Expression[propertyInfos.Length];
+
+            //Prepare assigment expressions for the concerned properties
+            for (int i = 0; i < propertyInfos.Length; i++)
+                assignmentExpressions[i] = Expression.Assign(Expression.Property(instance, propertyInfos[i].Name), Expression.Convert(Expression.ArrayIndex(propertyValues, Expression.Constant(i)), propertyInfos[i].PropertyType));
+            
+            //Assemble the set of expressions as a block
+            BlockExpression blockExpr = Expression.Block(assignmentExpressions);
+
+            //Return the prepared lamda expression to be able to compile
+            return Expression.Lambda(blockExpr, new ParameterExpression[] { instance, propertyValues });
+        }
+
+        /// <summary>
+        /// Call constructor
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="argValues"></param>
+        /// <returns></returns>
         public static object CallConstructor(Type type, params object[] argValues)
         {
             var ctor = type.GetConstructors().First();
@@ -68,6 +109,13 @@ namespace PointyBoot.Core
             return compiledActivator(argValues);
         }
 
+        /// <summary>
+        /// Build generic method
+        /// </summary>
+        /// <param name="methodName"></param>
+        /// <param name="context"></param>
+        /// <param name="genType"></param>
+        /// <returns></returns>
         public static MethodInfo BuildGenericMethod(string methodName, Type context, Type genType)
         {
             MethodInfo method = context.GetMethod(methodName);

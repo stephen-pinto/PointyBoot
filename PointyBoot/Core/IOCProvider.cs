@@ -13,11 +13,11 @@ namespace PointyBoot.Core
     /// </summary>
     public class IOCProvider
     {
-        private readonly IActivatorStore interContextSharedInfo;
+        private readonly IActivatorStore glblSharedInfo;
 
         public IOCProvider()
         {
-            interContextSharedInfo = PBServicesFactory.GetGlobalActivatorCache();
+            glblSharedInfo = PBServicesFactory.GetGlobalActivatorCache();
         }
 
         /// <summary>
@@ -48,8 +48,8 @@ namespace PointyBoot.Core
             else if (solidType != null && context.SingletonStore.ContainsKey(type))
                 return context.SingletonStore[solidType];
 
-            if (!interContextSharedInfo.ObjectInfo.ContainsKey(type))
-                interContextSharedInfo.ObjectInfo.Add(type, new PBObjectInfo(type));
+            if (!glblSharedInfo.ObjectInfo.ContainsKey(type))
+                glblSharedInfo.ObjectInfo.Add(type, new PBObjectInfo(type));
 
             //Instantiate
             object instance = null;
@@ -91,7 +91,7 @@ namespace PointyBoot.Core
         /// <param name="type"></param>
         public void Wire(IDIContext context, ref object instance, Type type)
         {
-            var autowiredProps = interContextSharedInfo.ObjectInfo[type].AutowiredProperties;
+            var autowiredProps = glblSharedInfo.ObjectInfo[type].AutowiredProperties;
 
             if (!autowiredProps.Any())
                 return;
@@ -112,36 +112,35 @@ namespace PointyBoot.Core
         /// <returns></returns>
         public object Instantiate(IDIContext context, Type type)
         {
-            var constructor = GetInitializableConstructor(type);
+            var objInfo = glblSharedInfo.ObjectInfo[type];
+            var constructor = objInfo.CallableConstructor;
 
             if (constructor == null)
                 throw new ArgumentException("No suitable constructor found. Need either Autowired or Default constructor present.");
 
-            var parameters = constructor.GetParameters();
+            var parameters = objInfo.ConstructorParams;
 
             GenericActivator objActivator;
-            if (interContextSharedInfo.ObjectInfo.ContainsKey(type) && interContextSharedInfo.ObjectInfo[type].Activator != null)
+            if (objInfo.Activator != null)
             {
-                objActivator = interContextSharedInfo.ObjectInfo[type].Activator;
+                objActivator = objInfo.Activator;
             }
             else
             {
                 //TODO: Check if we can use BuildPrimitiveActivator here for parameterless constructor
                 objActivator = IOCHelper.BuildObjectActivator(constructor, parameters);
-                interContextSharedInfo.ObjectInfo[type].Activator = objActivator;
+                objInfo.Activator = objActivator;
             }
 
             //If no parameterized constructor then return plain instance
             if (!parameters.Any())
-            {
                 return objActivator();
-            }
-
+            
             //Get primitive values if defined
-            var primVals = constructor.GetCustomAttribute<Autowired>().PrimitiveTypeValues;
+            var primitiveDefaults = objInfo.ConstructorAttribute.PrimitiveDefaults;
 
             //Else get instance of dependent instances
-            object[] paramInstances = SetParameters(context, parameters, primVals);
+            object[] paramInstances = SetParameters(context, parameters, primitiveDefaults);
 
             return objActivator(paramInstances);
         }
@@ -166,7 +165,7 @@ namespace PointyBoot.Core
                 return Activator.CreateInstance(type);
 
             //Get primitive values if defined
-            var primVals = constructor.GetCustomAttribute<Autowired>().PrimitiveTypeValues;
+            var primVals = constructor.GetCustomAttribute<Autowired>().PrimitiveDefaults;
 
             //Else get instance of dependent instances
             object[] paramInstances = SetParameters(context, parameters, primVals);
@@ -181,9 +180,9 @@ namespace PointyBoot.Core
         /// </summary>
         /// <param name="context"></param>
         /// <param name="parameters"></param>
-        /// <param name="primVals"></param>
+        /// <param name="primitiveDefaults"></param>
         /// <returns></returns>
-        private object[] SetParameters(IDIContext context, ParameterInfo[] parameters, object[] primVals)
+        private object[] SetParameters(IDIContext context, ParameterInfo[] parameters, object[] primitiveDefaults)
         {
             //Else get instance of dependent instances
             object[] paramInstances = new object[parameters.Length];
@@ -199,8 +198,8 @@ namespace PointyBoot.Core
                 if (parmType.IsPrimitive)
                 {
                     //If it is a primitive type then instantiate with regular method activator
-                    if (primVals != null && primVals.Length >= primValIndex)
-                        paramInstances[i] = primVals[primValIndex++];
+                    if (primitiveDefaults != null && primitiveDefaults.Length >= primValIndex)
+                        paramInstances[i] = primitiveDefaults[primValIndex++];
                     else
                         paramInstances[i] = Activator.CreateInstance(parmType);
                 }
