@@ -35,6 +35,11 @@ namespace PointyBoot.Core
             return compiledActivator;
         }
 
+        /// <summary>
+        /// Builds a primitive activator
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static StronglyTypedActivator<T> BuildPrimitiveActivator<T>()
         {
             ParameterExpression param = Expression.Parameter(typeof(object[]), "args");
@@ -50,6 +55,12 @@ namespace PointyBoot.Core
             return compiled;
         }
 
+        /// <summary>
+        /// Calls the constructor by type and arguments
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="argValues"></param>
+        /// <returns></returns>
         public static object CallConstructor(Type type, params object[] argValues)
         {
             var ctor = type.GetConstructors().First();
@@ -68,6 +79,13 @@ namespace PointyBoot.Core
             return compiledActivator(argValues);
         }
 
+        /// <summary>
+        /// Builds generic method using expression
+        /// </summary>
+        /// <param name="methodName"></param>
+        /// <param name="context"></param>
+        /// <param name="genType"></param>
+        /// <returns></returns>
         public static MethodInfo BuildGenericMethod(string methodName, Type context, Type genType)
         {
             MethodInfo method = context.GetMethod(methodName);
