@@ -10,9 +10,9 @@ namespace PointyBoot.Attributes
 
         public Autowired(params object[] primitiveParamValues)
         {
-            PrimitiveTypeValues = primitiveParamValues;          
+            PrimitiveDefaults = primitiveParamValues;          
         }
 
-        internal object[] PrimitiveTypeValues { get; private set; }
+        internal object[] PrimitiveDefaults { get; private set; }
     }
 }

@@ -20,10 +20,10 @@ namespace PointyBootTest
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
-            AutowiredClass[] array = new AutowiredClass[1000];
-            for (int i = 0; i < 1000; i++)
+            AutowiredClass[] array = new AutowiredClass[count];
+            for (int i = 0; i < count; i++)
             {
-                array[0] = service.Get<AutowiredClass>();
+                array[i] = service.Get<AutowiredClass>();
             }
 
             sw.Stop();
