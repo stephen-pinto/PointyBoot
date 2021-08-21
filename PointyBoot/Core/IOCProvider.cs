@@ -148,10 +148,10 @@ namespace PointyBoot.Core
             }
 
             //Get primitive values if defined
-            var primVals = constructor.GetCustomAttribute<Autowired>().PrimitiveDefaults;
+            var primitiveDefaults = constructor.GetCustomAttribute<Autowired>().PrimitiveDefaults;
 
             //Else get instance of dependent instances
-            object[] paramInstances = SetParameters(context, parameters, primVals);
+            object[] paramInstances = SetParameters(context, parameters, primitiveDefaults);
 
             return objActivator(paramInstances);
         }
@@ -191,9 +191,9 @@ namespace PointyBoot.Core
         /// </summary>
         /// <param name="context"></param>
         /// <param name="parameters"></param>
-        /// <param name="primVals"></param>
+        /// <param name="primitiveDefaults"></param>
         /// <returns></returns>
-        private object[] SetParameters(IDIContext context, ParameterInfo[] parameters, object[] primVals)
+        private object[] SetParameters(IDIContext context, ParameterInfo[] parameters, object[] primitiveDefaults)
         {
             //Else get instance of dependent instances
             object[] paramInstances = new object[parameters.Length];
@@ -209,8 +209,8 @@ namespace PointyBoot.Core
                 if (parmType.IsPrimitive)
                 {
                     //If it is a primitive type then instantiate with regular method activator
-                    if (primVals != null && primVals.Length >= primValIndex)
-                        paramInstances[i] = primVals[primValIndex++];
+                    if (primitiveDefaults != null && primitiveDefaults.Length >= primValIndex)
+                        paramInstances[i] = primitiveDefaults[primValIndex++];
                     else
                         paramInstances[i] = Activator.CreateInstance(parmType);
                 }
