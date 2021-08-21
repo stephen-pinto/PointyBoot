@@ -10,7 +10,7 @@ namespace PointyBootTest
     public class PointyBootDIServiceTest
     {
         [DataTestMethod]
-        [DataRow(5000)]
+        [DataRow(1000)]
         public void TestInstantiationOfMultipleAutowiredClass(int count)
         {
             PointyBootDIService service = new PointyBootDIService();
