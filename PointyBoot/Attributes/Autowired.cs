@@ -13,9 +13,6 @@ namespace PointyBoot.Attributes
             PrimitiveDefaults = primitiveParamValues;          
         }
 
-        /// <summary>
-        /// Default values for primitive types
-        /// </summary>
         internal object[] PrimitiveDefaults { get; private set; }
     }
 }

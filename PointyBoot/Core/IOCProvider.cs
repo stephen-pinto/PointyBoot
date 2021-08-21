@@ -122,33 +122,32 @@ namespace PointyBoot.Core
         /// <returns></returns>
         public object Instantiate(IDIContext context, Type type)
         {
-            var constructor = GetInitializableConstructor(type);
+            var objInfo = glblSharedInfo.ObjectInfo[type];
+            var constructor = objInfo.CallableConstructor;
 
             if (constructor == null)
                 throw new ArgumentException("No suitable constructor found. Need either Autowired or Default constructor present.");
 
-            var parameters = constructor.GetParameters();
+            var parameters = objInfo.ConstructorParams;
 
             GenericActivator objActivator;
-            if (glblSharedInfo.ObjectInfo.ContainsKey(type) && glblSharedInfo.ObjectInfo[type].Activator != null)
+            if (objInfo.Activator != null)
             {
-                objActivator = glblSharedInfo.ObjectInfo[type].Activator;
+                objActivator = objInfo.Activator;
             }
             else
             {
                 //TODO: Check if we can use BuildPrimitiveActivator here for parameterless constructor
                 objActivator = IOCHelper.BuildObjectActivator(constructor, parameters);
-                glblSharedInfo.ObjectInfo[type].Activator = objActivator;
+                objInfo.Activator = objActivator;
             }
 
             //If no parameterized constructor then return plain instance
             if (!parameters.Any())
-            {
                 return objActivator();
-            }
-
+            
             //Get primitive values if defined
-            var primitiveDefaults = constructor.GetCustomAttribute<Autowired>().PrimitiveDefaults;
+            var primitiveDefaults = objInfo.ConstructorAttribute.PrimitiveDefaults;
 
             //Else get instance of dependent instances
             object[] paramInstances = SetParameters(context, parameters, primitiveDefaults);

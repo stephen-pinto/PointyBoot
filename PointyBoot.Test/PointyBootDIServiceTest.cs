@@ -10,7 +10,7 @@ namespace PointyBootTest
     public class PointyBootDIServiceTest
     {
         [DataTestMethod]
-        [DataRow(1000)]
+        [DataRow(5000)]
         public void TestInstantiationOfMultipleAutowiredClass(int count)
         {
             PointyBootDIService service = new PointyBootDIService();
@@ -20,8 +20,8 @@ namespace PointyBootTest
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
-            AutowiredClass[] array = new AutowiredClass[1000];
-            for (int i = 0; i < 1000; i++)
+            AutowiredClass[] array = new AutowiredClass[count];
+            for (int i = 0; i < count; i++)
             {
                 array[i] = service.Get<AutowiredClass>();
             }
