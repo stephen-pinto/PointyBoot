@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace PointyBoot.Core
 {
-    internal static class IOCHelper
+    public static class IOCHelper
     {
         /// <summary>
         /// Builds a argument based activator
@@ -91,6 +91,36 @@ namespace PointyBoot.Core
             MethodInfo method = context.GetMethod(methodName);
             MethodInfo generic = method.MakeGenericMethod(genType);
             return generic;
+        }
+
+        /// <summary>
+        /// This function builds a simple property setting lamda function for wiring.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="propertyInfos"></param>
+        /// <returns></returns>
+        public static LambdaExpression BuildPropertySetterFunction(Type type, PropertyInfo[] propertyInfos)
+        {
+            //Define parameters for the lamda function
+            var instance = Expression.Parameter(type, "obj");
+            var propertyValues = Expression.Parameter(typeof(object[]), "instances");
+
+            //TODO: Check if using this gives better performance
+            //MemberAssignment[] assignments = new MemberAssignment[propertyInfos.Count()];
+            //for (int i = 0; i < propertyInfos.Count(); i++)
+            //    assignments[i] = Expression.Bind(propertyInfos[i], Expression.Convert(Expression.ArrayIndex(propertyValues, Expression.Constant(i)), propertyInfos[i].PropertyType));
+
+            Expression[] assignmentExpressions = new Expression[propertyInfos.Length];
+
+            //Prepare assigment expressions for the concerned properties
+            for (int i = 0; i < propertyInfos.Length; i++)
+                assignmentExpressions[i] = Expression.Assign(Expression.Property(instance, propertyInfos[i].Name), Expression.Convert(Expression.ArrayIndex(propertyValues, Expression.Constant(i)), propertyInfos[i].PropertyType));
+
+            //Assemble the set of expressions as a block
+            BlockExpression blockExpr = Expression.Block(assignmentExpressions);
+
+            //Return the prepared lamda expression to be able to compile
+            return Expression.Lambda(blockExpr, new ParameterExpression[] { instance, propertyValues });
         }
 
         //private void InvokeCon(ConstructorInfo constructorInfo, ParameterInfo[] pi, object[] p, Type type)
