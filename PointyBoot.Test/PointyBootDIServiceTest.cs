@@ -10,24 +10,33 @@ namespace PointyBootTest
     public class PointyBootDIServiceTest
     {
         [DataTestMethod]
-        [DataRow(1000)]
+        [DataRow(1000000)]
         public void TestInstantiationOfMultipleAutowiredClass(int count)
         {
             PointyBootDIService service = new PointyBootDIService();
             ComponentProviderSample sample = new ComponentProviderSample();
             service.RegisterComponentFactory(sample);
 
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-
             AutowiredClass[] array = new AutowiredClass[count];
             for (int i = 0; i < count; i++)
             {
                 array[i] = service.Get<AutowiredClass>();
             }
+        }
 
-            sw.Stop();
-            Console.WriteLine($"Completed allocations with PBServiceProvider in {sw.ElapsedMilliseconds} ms");
+        [DataTestMethod]
+        [DataRow(1000000)]
+        public void TestInstantiationOfMultipleClassNormally(int count)
+        {
+            
+            AutowiredClass[] array = new AutowiredClass[count];
+            for (int i = 0; i < count; i++)
+            {
+                array[i] = new AutowiredClass();
+                array[i].Prop1 = new TestData.Set1.CoordA();
+                array[i].Prop2 = new TestData.Set1.Area(new TestData.Set1.CoordA(), new TestData.Set1.CoordB(), 1000);
+                array[i].Prop3 = new ComponentSample2(1000);
+            }
         }
     }
 }
