@@ -16,7 +16,7 @@ This project is inspired from the DI model of SpringBoot project. It does not in
 ### Features
 - Supports session based DI service with transient singletons (lasting only for a session) like supported in ASP.NET Core DI with 'AddTransient()' function. This is facilitated by PBContext.
 - Each session (context) can have its own factory and class type to interface mapping.
-- Factory function and factory classes with automatic ditection of serving types.
+- Factory function and factory classes with automatic detection of serving types.
 - Support for Singleton.
 
 ### Run and test
