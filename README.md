@@ -4,7 +4,7 @@
 A C# version of SpringBoot Depenedency management framework.
       
 - This is just a DI framework to solve DI for functions, properties and classes like how SpringBoot works. Needs more performance improvement.
-- The name derives from C#'s Sharp and SpringBoot's Boot = SharpBoot = PointyBoot :stuck_out_tongue_winking_eye: 
+- The name derives from C#'s Sharp and SpringBoot's Boot + C#'s Sharp = SharpBoot => PointyBoot :stuck_out_tongue_winking_eye: 
 
 ### Goal
 This project is inspired from the DI model of SpringBoot project. It does not intend to be exactly same nor is even close to the vastness of that project but tries to implement its core ideas in C# .NET. It focuses on providing DI in below segments of a application code -
@@ -14,7 +14,7 @@ This project is inspired from the DI model of SpringBoot project. It does not in
 - Functions [coming soon]
 
 ### Features
-- Supports session based DI service with transient singletons (lasting only for a session) like supported in ASP.NET Core DI with 'AddTransient()' function. This is facilitated by PBContext.
+- Supports session based DI service with transient singletons (lasting only for a session) like supported in ASP.NET Core DI with '_AddTransient()_' function. This is facilitated by PBContext.
 - Each session (context) can have its own factory and class type to interface mapping.
 - Factory function and factory classes with automatic detection of serving types.
 - Support for Singleton.
